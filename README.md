@@ -46,3 +46,5 @@ Some changes I added had been to override console.log to output to a div on the 
 **Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
 
 No special changes besides the names.
+
+**(Diff)[./diffs/npm..oldSchool.patch]**

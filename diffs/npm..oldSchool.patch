@@ -1,0 +1,73 @@
+diff --git a/README.md b/README.md
+index 70f7d37..db40ed2 100644
+--- a/README.md
++++ b/README.md
+@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
+ 
+ ## Using JavaScript the “old-school” way
+ 
+-**Branch: (oldSchool)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool]**
++**Branch: oldSchool**
+ 
+ Showing how you do things with works with browser only, meaning no need for an httpd style server.
+ 
+@@ -39,10 +39,4 @@ Some changes I added had been to override console.log to output to a div on the
+         <script src="index.js"></script>
+     </body>
+ </html>
+-```
+-
+-## Using a JavaScript package manager (npm)
+-
+-**Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
+-
+-No special changes besides the names.
+\ No newline at end of file
++```
+\ No newline at end of file
+diff --git a/index.html b/index.html
+index 2025bf4..381bc5c 100644
+--- a/index.html
++++ b/index.html
+@@ -3,7 +3,7 @@
+     <head>
+         <meta charset="UTF-8">
+         <title>JavaScript Example</title>
+-        <script src="node_modules/moment/min/moment.min.js"></script>
++        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
+     </head>
+     <body>
+         <h1>Hello from HTML!</h1>
+diff --git a/package.json b/package.json
+deleted file mode 100644
+index 1447c64..0000000
+--- a/package.json
++++ /dev/null
+@@ -1,27 +0,0 @@
+-{
+-  "name": "modern-js4dinosaurs",
+-  "version": "1.0.0",
+-  "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+-  "main": "index.js",
+-  "scripts": {
+-    "test": "echo \"Error: no test specified\" && exit 1"
+-  },
+-  "repository": {
+-    "type": "git",
+-    "url": "git+https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs.git"
+-  },
+-  "keywords": [
+-    "tutorial",
+-    "npm",
+-    "javascript"
+-  ],
+-  "author": "Thorsten Scherler",
+-  "license": "ISC",
+-  "bugs": {
+-    "url": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/issues"
+-  },
+-  "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
+-  "dependencies": {
+-    "moment": "2.19.1"
+-  }
+-}

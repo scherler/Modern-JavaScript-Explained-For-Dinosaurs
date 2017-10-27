@@ -7,11 +7,11 @@
     </head>
     <body>
         <h1>Hello from HTML!</h1>
+        <div>Console.log here:</div>
         <div id="log"></div>
         <script>
             // https://stackoverflow.com/questions/20256760/javascript-console-log-to-html
             (function () {
-                var old = console.log;
                 var logger = document.getElementById('log');
                 console.log = function (message) {
                     if (typeof message == 'object') {
@@ -19,7 +19,6 @@
                     } else {
                         logger.innerHTML += message + '<br />';
                     }
-                    old(message);
                 }
             })();
         </script>

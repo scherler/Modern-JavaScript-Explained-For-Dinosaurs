@@ -47,4 +47,4 @@ Some changes I added had been to override console.log to output to a div on the 
 
 No special changes besides the names.
 
-**[Diff](./diffs/oldSchool..npm)**
+**[Diff](./diffs/oldSchool..npm)** `git diff oldSchool..npm`

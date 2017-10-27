@@ -1,0 +1,27 @@
+{
+  "name": "modern-js4dinosaurs",
+  "version": "1.0.0",
+  "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs.git"
+  },
+  "keywords": [
+    "tutorial",
+    "npm",
+    "javascript"
+  ],
+  "author": "Thorsten Scherler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/issues"
+  },
+  "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
+  "dependencies": {
+    "moment": "2.19.1"
+  }
+}

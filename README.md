@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
 
 ## Using JavaScript the “old-school” way
 
-**Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool)**
+**Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/001_oldSchool)**
 
 Showing how you do things with works with browser only, meaning no need for an httpd style server.
 
@@ -43,8 +43,8 @@ Some changes I added had been to override console.log to output to a div on the 
 
 ## Using a JavaScript package manager (npm)
 
-**Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm)**
+**Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/002_npm)**
 
 No special changes besides the names.
 
-**[Diff](./diffs/oldSchool..npm)** `git diff oldSchool..npm`
+**[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`

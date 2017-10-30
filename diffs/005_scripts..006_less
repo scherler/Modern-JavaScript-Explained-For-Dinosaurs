@@ -1,0 +1,604 @@
+diff --git a/.gitignore b/.gitignore
+index 33b4823..20b2696 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -59,3 +59,4 @@ typings/
+ 
+ /.idea/
+ /bundle.js
++/bundle.css
+diff --git a/README.md b/README.md
+index 19b2fa1..765e943 100644
+--- a/README.md
++++ b/README.md
+@@ -1,7 +1,14 @@
+ # Modern-JavaScript-Explained-For-Dinosaurs
+-based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70
+ 
+-This repository will implement the article and link to the corresponding commits/branches.
++**based on the article of [Peter Jang, Modern JavaScript Explained For Dinosaurs](https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70)**
++
++This repository will implement the article and link to the corresponding commits/branches. You should be able to read along the article and follow the corresponding branches.
++
++To see the current master branch in action you need to run
++
++```npm
++npm i && npm start
++```
+ 
+ ## Using JavaScript the “old-school” way
+ 
+@@ -72,3 +79,8 @@ No special changes.
+ No special changes besides to show how to link scripts in npm and implement "standard" target `start` and `bundle`.
+ 
+ **[Diff](./diffs/004_babel..005_scripts)** `git diff 004_babel..005_scripts`
++
++
++# Want more examples
++
++[part2](./part2.md)
+\ No newline at end of file
+diff --git a/diffs/002_npm..003_webpack b/diffs/002_npm..003_webpack
+index 7179d91..1c32c0f 100644
+--- a/diffs/002_npm..003_webpack
++++ b/diffs/002_npm..003_webpack
+@@ -8,7 +8,7 @@ index 2bdd604..33b4823 100644
+  /.idea/
+ +/bundle.js
+ diff --git a/README.md b/README.md
+-index 70f7d37..eb2948f 100644
++index 70f7d37..6fb6114 100644
+ --- a/README.md
+ +++ b/README.md
+ @@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
+@@ -20,7 +20,7 @@ index 70f7d37..eb2948f 100644
+  
+  Showing how you do things with works with browser only, meaning no need for an httpd style server.
+  
+-@@ -43,6 +43,8 @@ Some changes I added had been to override console.log to output to a div on the
++@@ -43,6 +43,16 @@ Some changes I added had been to override console.log to output to a div on the
+  
+  ## Using a JavaScript package manager (npm)
+  
+@@ -32,6 +32,14 @@ index 70f7d37..eb2948f 100644
+ +No special changes besides the names.
+ +
+ +**[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
+++
+++## Using a JavaScript module bundler (webpack)
+++
+++**Branch: [webpack](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/003_webpack)**
+++
+++No special changes besides adding bundle command to package.json. `npm run bundle`
+++
+++**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
+ \ No newline at end of file
+ diff --git a/diffs/001_oldSchool..002_npm b/diffs/001_oldSchool..002_npm
+ new file mode 100644
+@@ -112,6 +120,192 @@ index 0000000..13189cf
+ ++    "moment": "2.19.1"
+ ++  }
+ ++}
++diff --git a/diffs/002_npm..003_webpack b/diffs/002_npm..003_webpack
++new file mode 100644
++index 0000000..7179d91
++--- /dev/null
+++++ b/diffs/002_npm..003_webpack
++@@ -0,0 +1,180 @@
+++diff --git a/.gitignore b/.gitignore
+++index 2bdd604..33b4823 100644
+++--- a/.gitignore
++++++ b/.gitignore
+++@@ -58,3 +58,4 @@ typings/
+++ .env
+++ 
+++ /.idea/
++++/bundle.js
+++diff --git a/README.md b/README.md
+++index 70f7d37..eb2948f 100644
+++--- a/README.md
++++++ b/README.md
+++@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
+++ 
+++ ## Using JavaScript the “old-school” way
+++ 
+++-**Branch: (oldSchool)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool]**
++++**Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/001_oldSchool)**
+++ 
+++ Showing how you do things with works with browser only, meaning no need for an httpd style server.
+++ 
+++@@ -43,6 +43,8 @@ Some changes I added had been to override console.log to output to a div on the
+++ 
+++ ## Using a JavaScript package manager (npm)
+++ 
+++-**Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
++++**Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/002_npm)**
+++ 
+++-No special changes besides the names.
+++\ No newline at end of file
++++No special changes besides the names.
++++
++++**[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
+++\ No newline at end of file
+++diff --git a/diffs/001_oldSchool..002_npm b/diffs/001_oldSchool..002_npm
+++new file mode 100644
+++index 0000000..13189cf
+++--- /dev/null
++++++ b/diffs/001_oldSchool..002_npm
+++@@ -0,0 +1,73 @@
++++diff --git a/README.md b/README.md
++++index db40ed2..70f7d37 100644
++++--- a/README.md
+++++++ b/README.md
++++@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
++++ 
++++ ## Using JavaScript the “old-school” way
++++ 
++++-**Branch: oldSchool**
+++++**Branch: (oldSchool)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool]**
++++ 
++++ Showing how you do things with works with browser only, meaning no need for an httpd style server.
++++ 
++++@@ -39,4 +39,10 @@ Some changes I added had been to override console.log to output to a div on the
++++         <script src="index.js"></script>
++++     </body>
++++ </html>
++++-```
++++\ No newline at end of file
+++++```
+++++
+++++## Using a JavaScript package manager (npm)
+++++
+++++**Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
+++++
+++++No special changes besides the names.
++++\ No newline at end of file
++++diff --git a/index.html b/index.html
++++index 381bc5c..2025bf4 100644
++++--- a/index.html
+++++++ b/index.html
++++@@ -3,7 +3,7 @@
++++     <head>
++++         <meta charset="UTF-8">
++++         <title>JavaScript Example</title>
++++-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
+++++        <script src="node_modules/moment/min/moment.min.js"></script>
++++     </head>
++++     <body>
++++         <h1>Hello from HTML!</h1>
++++diff --git a/package.json b/package.json
++++new file mode 100644
++++index 0000000..1447c64
++++--- /dev/null
+++++++ b/package.json
++++@@ -0,0 +1,27 @@
+++++{
+++++  "name": "modern-js4dinosaurs",
+++++  "version": "1.0.0",
+++++  "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+++++  "main": "index.js",
+++++  "scripts": {
+++++    "test": "echo \"Error: no test specified\" && exit 1"
+++++  },
+++++  "repository": {
+++++    "type": "git",
+++++    "url": "git+https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs.git"
+++++  },
+++++  "keywords": [
+++++    "tutorial",
+++++    "npm",
+++++    "javascript"
+++++  ],
+++++  "author": "Thorsten Scherler",
+++++  "license": "ISC",
+++++  "bugs": {
+++++    "url": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/issues"
+++++  },
+++++  "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
+++++  "dependencies": {
+++++    "moment": "2.19.1"
+++++  }
+++++}
+++diff --git a/index.html b/index.html
+++index 2025bf4..99a64f9 100644
+++--- a/index.html
++++++ b/index.html
+++@@ -3,7 +3,6 @@
+++     <head>
+++         <meta charset="UTF-8">
+++         <title>JavaScript Example</title>
+++-        <script src="node_modules/moment/min/moment.min.js"></script>
+++     </head>
+++     <body>
+++         <h1>Hello from HTML!</h1>
+++@@ -22,6 +21,6 @@
+++                 }
+++             })();
+++         </script>
+++-        <script src="index.js"></script>
++++        <script src="bundle.js"></script>
+++     </body>
+++ </html>
+++\ No newline at end of file
+++diff --git a/index.js b/index.js
+++index 95dc213..1fcd0b3 100644
+++--- a/index.js
++++++ b/index.js
+++@@ -1,3 +1,4 @@
+++ // index.js
++++const moment = require('moment');
+++ console.log('Hello from JavaScript!');
+++ console.log('startOf("day").fromNow(): ' + moment().startOf('day').fromNow());
+++\ No newline at end of file
+++diff --git a/package.json b/package.json
+++index 1447c64..2f7c1d6 100644
+++--- a/package.json
++++++ b/package.json
+++@@ -4,6 +4,7 @@
+++   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+++   "main": "index.js",
+++   "scripts": {
++++    "bundle": "webpack",
+++     "test": "echo \"Error: no test specified\" && exit 1"
+++   },
+++   "repository": {
+++@@ -23,5 +24,8 @@
+++   "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
+++   "dependencies": {
+++     "moment": "2.19.1"
++++  },
++++  "devDependencies": {
++++    "webpack": "3.8.1"
+++   }
+++ }
+++diff --git a/webpack.config.js b/webpack.config.js
+++new file mode 100644
+++index 0000000..9bdf93b
+++--- /dev/null
++++++ b/webpack.config.js
+++@@ -0,0 +1,7 @@
++++// webpack.config.js
++++module.exports = {
++++  entry: './index.js',
++++  output: {
++++    filename: 'bundle.js'
++++  }
++++};
+++\ No newline at end of file
+ diff --git a/index.html b/index.html
+ index 2025bf4..99a64f9 100644
+ --- a/index.html
+diff --git a/diffs/003_webpack..004_babel b/diffs/003_webpack..004_babel
+index e69de29..bd94d9c 100644
+--- a/diffs/003_webpack..004_babel
++++ b/diffs/003_webpack..004_babel
+@@ -0,0 +1,80 @@
++diff --git a/README.md b/README.md
++index 6fb6114..25d1621 100644
++--- a/README.md
+++++ b/README.md
++@@ -55,4 +55,12 @@ No special changes besides the names.
++ 
++ No special changes besides adding bundle command to package.json. `npm run bundle`
++ 
++-**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
++\ No newline at end of file
+++**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
+++
+++## Transpiling code for new language features (babel)
+++
+++**Branch: [babel](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/004_babel)**
+++
+++No special changes.
+++
+++**[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
++diff --git a/diffs/003_webpack..004_babel b/diffs/003_webpack..004_babel
++new file mode 100644
++index 0000000..e69de29
++diff --git a/index.js b/index.js
++index 1fcd0b3..0dfa5d6 100644
++--- a/index.js
+++++ b/index.js
++@@ -1,4 +1,4 @@
++ // index.js
++-const moment = require('moment');
+++import moment from 'moment';
++ console.log('Hello from JavaScript!');
++-console.log('startOf("day").fromNow(): ' + moment().startOf('day').fromNow());
++\ No newline at end of file
+++console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
++\ No newline at end of file
++diff --git a/package.json b/package.json
++index 2f7c1d6..babd80f 100644
++--- a/package.json
+++++ b/package.json
++@@ -26,6 +26,9 @@
++     "moment": "2.19.1"
++   },
++   "devDependencies": {
+++    "babel-core": "6.26.0",
+++    "babel-loader": "7.1.2",
+++    "babel-preset-env": "1.6.1",
++     "webpack": "3.8.1"
++   }
++ }
++diff --git a/webpack.config.js b/webpack.config.js
++index 9bdf93b..9f37005 100644
++--- a/webpack.config.js
+++++ b/webpack.config.js
++@@ -1,7 +1,21 @@
++ // webpack.config.js
++ module.exports = {
++-  entry: './index.js',
++-  output: {
++-    filename: 'bundle.js'
++-  }
+++    entry: './index.js',
+++    output: {
+++        filename: 'bundle.js'
+++    },
+++    module: {
+++        rules: [
+++            {
+++                test: /\.js$/,
+++                exclude: /node_modules/,
+++                use: {
+++                    loader: 'babel-loader',
+++                    options: {
+++                        presets: ['env']
+++                    }
+++                }
+++            }
+++        ]
+++    }
++ };
++\ No newline at end of file
+diff --git a/diffs/004_babel..005_scripts b/diffs/004_babel..005_scripts
+index e69de29..3b54b67 100644
+--- a/diffs/004_babel..005_scripts
++++ b/diffs/004_babel..005_scripts
+@@ -0,0 +1,71 @@
++diff --git a/README.md b/README.md
++index 25d1621..19b2fa1 100644
++--- a/README.md
+++++ b/README.md
++@@ -64,3 +64,11 @@ No special changes besides adding bundle command to package.json. `npm run bundl
++ No special changes.
++ 
++ **[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
+++
+++## Using a task runner (npm scripts)
+++
+++**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/005_scripts)**
+++
+++No special changes besides to show how to link scripts in npm and implement "standard" target `start` and `bundle`.
+++
+++**[Diff](./diffs/004_babel..005_scripts)** `git diff 004_babel..005_scripts`
++diff --git a/diffs/004_babel..005_scripts b/diffs/004_babel..005_scripts
++new file mode 100644
++index 0000000..e69de29
++diff --git a/index.html b/index.html
++index 99a64f9..dbe9c03 100644
++--- a/index.html
+++++ b/index.html
++@@ -11,7 +11,7 @@
++         <script>
++             // https://stackoverflow.com/questions/20256760/javascript-console-log-to-html
++             (function () {
++-                var logger = document.getElementById('log');
+++                const logger = document.getElementById('log');
++                 console.log = function (message) {
++                     if (typeof message == 'object') {
++                         logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
++diff --git a/index.js b/index.js
++index 0dfa5d6..002168d 100644
++--- a/index.js
+++++ b/index.js
++@@ -1,4 +1,4 @@
++ // index.js
++ import moment from 'moment';
++-console.log('Hello from JavaScript!');
+++console.log('Hello from JavaScript and weback server!');
++ console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
++\ No newline at end of file
++diff --git a/package.json b/package.json
++index babd80f..a773e99 100644
++--- a/package.json
+++++ b/package.json
++@@ -4,8 +4,12 @@
++   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
++   "main": "index.js",
++   "scripts": {
++-    "bundle": "webpack",
++-    "test": "echo \"Error: no test specified\" && exit 1"
+++    "bundle": "npm run build",
+++    "build": "webpack --progress -p",
+++    "watch": "webpack --progress --watch",
+++    "test": "echo \"Error: no test specified\" && exit 1",
+++    "server": "webpack-dev-server --open",
+++    "start": "npm run server"
++   },
++   "repository": {
++     "type": "git",
++@@ -29,6 +33,7 @@
++     "babel-core": "6.26.0",
++     "babel-loader": "7.1.2",
++     "babel-preset-env": "1.6.1",
++-    "webpack": "3.8.1"
+++    "webpack": "3.8.1",
+++    "webpack-dev-server": "2.9.3"
++   }
++ }
+diff --git a/index.html b/index.html
+index dbe9c03..061690b 100644
+--- a/index.html
++++ b/index.html
+@@ -3,6 +3,8 @@
+     <head>
+         <meta charset="UTF-8">
+         <title>JavaScript Example</title>
++        <!-- the generated css we want to use -->
++        <link href="bundle.css" rel="stylesheet" title="Default Style"/>
+     </head>
+     <body>
+         <h1>Hello from HTML!</h1>
+diff --git a/index.js b/index.js
+index 002168d..0ebe85f 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,5 @@
+ // index.js
+ import moment from 'moment';
++import './index.less'; // tell webpack to request the transpiling of less to css
+ console.log('Hello from JavaScript and weback server!');
+ console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
+\ No newline at end of file
+diff --git a/index.less b/index.less
+new file mode 100644
+index 0000000..e5f79bd
+--- /dev/null
++++ b/index.less
+@@ -0,0 +1,6 @@
++@font-stack: Helvetica, sans-serif;
++@primary-color: #333;
++body {
++    font: 100% @font-stack;
++    color: @primary-color;
++}
+diff --git a/package.json b/package.json
+index a773e99..3514e1f 100644
+--- a/package.json
++++ b/package.json
+@@ -33,6 +33,11 @@
+     "babel-core": "6.26.0",
+     "babel-loader": "7.1.2",
+     "babel-preset-env": "1.6.1",
++    "css-loader": "0.28.7",
++    "extract-text-webpack-plugin": "3.0.2",
++    "less": "2.7.3",
++    "less-loader": "4.0.5",
++    "style-loader": "0.19.0",
+     "webpack": "3.8.1",
+     "webpack-dev-server": "2.9.3"
+   }
+diff --git a/part2.md b/part2.md
+new file mode 100644
+index 0000000..4b6a178
+--- /dev/null
++++ b/part2.md
+@@ -0,0 +1,66 @@
++# Part 2
++
++This part is not covered in the article but I wanted to complete the step to step until we have introduce Reat.js.
++
++## Using less to transpile to css
++
++[Less](http://lesscss.org/) is a CSS pre-processor similar to Sass.
++
++Installation
++
++```npm
++npm install less css-loader less-loader extract-text-webpack-plugin style-loader --save-dev
++```
++
++Here we use two loaders at the same time. The first one the less-loader (read from bottom to top) will compile Less into CSS then the css-loader will create a style tag that will be injected into your page on run time.
++To extract those inline styles into a file on its own we use the [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) to do so.
++
++Webpack configuration looks now like:
++
++```javascript
++// webpack.config.js
++const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
++const extractLess = new ExtractTextPlugin("bundle.css");
++module.exports = {
++    entry: [
++        './index.js',
++    ],
++    output: {
++        filename: 'bundle.js'
++    },
++    module: {
++        rules: [
++            {
++                test: /\.js$/,
++                exclude: /node_modules/,
++                use: {
++                    loader: 'babel-loader',
++                    options: {
++                        presets: ['env']
++                    }
++                }
++            },
++            {
++                test: /\.css$/,
++                exclude: /node_modules/,
++                use: extractLess.extract({
++                    use: ["css-loader"],
++                    // use style-loader in development
++                    fallback: "style-loader"
++                })
++            },
++            {
++                test: /\.less$/,
++                exclude: /node_modules/,
++                use: extractLess.extract({
++                    use: [ "css-loader", "less-loader"],
++                    // use style-loader in development
++                    fallback: "style-loader"
++                })
++            },
++        ],
++    },
++    // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
++    plugins: [ extractLess ],
++};
++```
+\ No newline at end of file
+diff --git a/webpack.config.js b/webpack.config.js
+index 9f37005..41d53af 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1,6 +1,10 @@
+ // webpack.config.js
++const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
++const extractLess = new ExtractTextPlugin("bundle.css");
+ module.exports = {
+-    entry: './index.js',
++    entry: [
++        './index.js',
++    ],
+     output: {
+         filename: 'bundle.js'
+     },
+@@ -15,7 +19,27 @@ module.exports = {
+                         presets: ['env']
+                     }
+                 }
+-            }
+-        ]
+-    }
++            },
++            {
++                test: /\.css$/,
++                exclude: /node_modules/,
++                use: extractLess.extract({
++                    use: ["css-loader"],
++                    // use style-loader in development
++                    fallback: "style-loader"
++                })
++            },
++            {
++                test: /\.less$/,
++                exclude: /node_modules/,
++                use: extractLess.extract({
++                    use: [ "css-loader", "less-loader"],
++                    // use style-loader in development
++                    fallback: "style-loader"
++                })
++            },
++        ],
++    },
++    // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
++    plugins: [ extractLess ],
+ };
+\ No newline at end of file

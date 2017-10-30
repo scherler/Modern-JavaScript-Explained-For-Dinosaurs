@@ -1,8 +1,12 @@
 # Part 2
 
-This part is not covered in the article but I wanted to complete the step to step until we have introduce Reat.js.
+This part is not covered in the article but I wanted to complete the step to step until we have a full runnning React.js application.
 
 ## Using less to transpile to css
+
+**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/006_less)**
+
+**[Diff](./diffs/005_scripts..006_less)** `git diff 005_scripts..006_less`
 
 [Less](http://lesscss.org/) is a CSS pre-processor similar to Sass.
 
@@ -64,3 +68,4 @@ module.exports = {
     plugins: [ extractLess ],
 };
 ```
+

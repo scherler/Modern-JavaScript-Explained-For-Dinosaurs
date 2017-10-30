@@ -69,3 +69,16 @@ module.exports = {
 };
 ```
 
+## Organize the code (folders)
+
+**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/007_folders)**
+
+**[Diff](./diffs/006_less..007_folders)** `git diff 006_less..007_folders`
+
+Showing how to have a basic folder structure and adopting webpack config to extract to a `dist` folder and move all source files to `src`.
+ 
+You will find `[name]` and `[id]` in the configuration file.
+
+- `[id]` is replaced by the id of the chunk.
+- `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
+

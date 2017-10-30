@@ -1,12 +1,13 @@
 // webpack.config.js
 const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
-const extractLess = new ExtractTextPlugin("bundle.css");
+const extractLess = new ExtractTextPlugin("dist/[name].css");
 module.exports = {
-    entry: [
-        './index.js',
-    ],
+    entry: {
+        index: './src/js/index.js',
+    },
     output: {
-        filename: 'bundle.js'
+        filename: 'dist/[name].js',
+        chunkFilename: "dist/[id].bundle.js"
     },
     module: {
         rules: [

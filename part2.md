@@ -82,3 +82,11 @@ You will find `[name]` and `[id]` in the configuration file.
 - `[id]` is replaced by the id of the chunk.
 - `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
 
+## Keep your code clean (lint)
+
+Linting is one of those techniques that can help you make fewer mistakes while coding JavaScript. You can spot issues before they become actual problems. Modern editors and IDEs offer strong support for popular tools allowing you to detect possible issues as you are developing.
+
+```npm
+npm install eslint --save-dev
+```
+

@@ -79,3 +79,8 @@ No special changes.
 No special changes besides to show how to link scripts in npm and implement "standard" target `start` and `bundle`.
 
 **[Diff](./diffs/004_babel..005_scripts)** `git diff 004_babel..005_scripts`
+
+
+# Want more examples
+
+[part2](./part2.md)

@@ -4,6 +4,7 @@
   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
   "main": "index.js",
   "scripts": {
+    "bundle": "webpack index.js bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,5 +24,8 @@
   "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
   "dependencies": {
     "moment": "2.19.1"
+  },
+  "devDependencies": {
+    "webpack": "3.8.1"
   }
 }

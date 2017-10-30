@@ -1,0 +1,96 @@
+diff --git a/.gitignore b/.gitignore
+index 20b2696..901a26c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -58,5 +58,4 @@ typings/
+ .env
+ 
+ /.idea/
+-/bundle.js
+-/bundle.css
++/dist/
+diff --git a/index.html b/index.html
+index 061690b..306db4d 100644
+--- a/index.html
++++ b/index.html
+@@ -4,7 +4,7 @@
+         <meta charset="UTF-8">
+         <title>JavaScript Example</title>
+         <!-- the generated css we want to use -->
+-        <link href="bundle.css" rel="stylesheet" title="Default Style"/>
++        <link href="dist/index.css" rel="stylesheet" title="Default Style"/>
+     </head>
+     <body>
+         <h1>Hello from HTML!</h1>
+@@ -23,6 +23,6 @@
+                 }
+             })();
+         </script>
+-        <script src="bundle.js"></script>
++        <script src="dist/index.js"></script>
+     </body>
+ </html>
+\ No newline at end of file
+diff --git a/part2.md b/part2.md
+index a3d3dde..2a6ce7b 100644
+--- a/part2.md
++++ b/part2.md
+@@ -69,3 +69,16 @@ module.exports = {
+ };
+ ```
+ 
++## Organize the code (folders)
++
++**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/007_folders)**
++
++**[Diff](./diffs/006_less..007_folders)** `git diff 006_less..007_folders`
++
++Showing how to have a basic folder structure and adopting webpack config to extract to a `dist` folder and move all source files to `src`.
++ 
++You will find `[name]` and `[id]` in the configuration file.
++
++- `[id]` is replaced by the id of the chunk.
++- `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
++
+diff --git a/index.js b/src/js/index.js
+similarity index 61%
+rename from index.js
+rename to src/js/index.js
+index 0ebe85f..e4fb489 100644
+--- a/index.js
++++ b/src/js/index.js
+@@ -1,5 +1,5 @@
+ // index.js
+ import moment from 'moment';
+-import './index.less'; // tell webpack to request the transpiling of less to css
++import '../less/index.less'; // tell webpack to request the transpiling of less to css
+ console.log('Hello from JavaScript and weback server!');
+ console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
+\ No newline at end of file
+diff --git a/index.less b/src/less/index.less
+similarity index 100%
+rename from index.less
+rename to src/less/index.less
+diff --git a/webpack.config.js b/webpack.config.js
+index 41d53af..edc7c35 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1,12 +1,13 @@
+ // webpack.config.js
+ const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
+-const extractLess = new ExtractTextPlugin("bundle.css");
++const extractLess = new ExtractTextPlugin("dist/[name].css");
+ module.exports = {
+-    entry: [
+-        './index.js',
+-    ],
++    entry: {
++        index: './src/js/index.js',
++    },
+     output: {
+-        filename: 'bundle.js'
++        filename: 'dist/[name].js',
++        chunkFilename: "dist/[id].bundle.js"
+     },
+     module: {
+         rules: [

@@ -3,6 +3,12 @@ based on the article of https://medium.com/@peterxjang/modern-javascript-explain
 
 This repository will implement the article and link to the corresponding commits/branches.
 
+To see the current master branch in action you need to run
+
+```npm
+npm i && npm start
+```
+
 ## Using JavaScript the “old-school” way
 
 **Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/001_oldSchool)**

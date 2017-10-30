@@ -64,3 +64,11 @@ No special changes besides adding bundle command to package.json. `npm run bundl
 No special changes.
 
 **[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
+
+## Using a task runner (npm scripts)
+
+**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/005_scripts)**
+
+No special changes besides to show how to link scripts in npm and implement "standard" target `start` and `bundle`.
+
+**[Diff](./diffs/004_babel..005_scripts)** `git diff 004_babel..005_scripts`

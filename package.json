@@ -4,8 +4,12 @@
   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
   "main": "index.js",
   "scripts": {
-    "bundle": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "bundle": "npm run build",
+    "build": "webpack --progress -p",
+    "watch": "webpack --progress --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "webpack-dev-server --open",
+    "start": "npm run server"
   },
   "repository": {
     "type": "git",
@@ -29,6 +33,7 @@
     "babel-core": "6.26.0",
     "babel-loader": "7.1.2",
     "babel-preset-env": "1.6.1",
-    "webpack": "3.8.1"
+    "webpack": "3.8.1",
+    "webpack-dev-server": "2.9.3"
   }
 }

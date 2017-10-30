@@ -56,3 +56,11 @@ No special changes besides the names.
 No special changes besides adding bundle command to package.json. `npm run bundle`
 
 **[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
+
+## Transpiling code for new language features (babel)
+
+**Branch: [babel](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/004_babel)**
+
+No special changes.
+
+**[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`

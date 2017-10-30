@@ -1,0 +1,71 @@
+diff --git a/README.md b/README.md
+index 25d1621..19b2fa1 100644
+--- a/README.md
++++ b/README.md
+@@ -64,3 +64,11 @@ No special changes besides adding bundle command to package.json. `npm run bundl
+ No special changes.
+ 
+ **[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
++
++## Using a task runner (npm scripts)
++
++**Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/005_scripts)**
++
++No special changes besides to show how to link scripts in npm and implement "standard" target `start` and `bundle`.
++
++**[Diff](./diffs/004_babel..005_scripts)** `git diff 004_babel..005_scripts`
+diff --git a/diffs/004_babel..005_scripts b/diffs/004_babel..005_scripts
+new file mode 100644
+index 0000000..e69de29
+diff --git a/index.html b/index.html
+index 99a64f9..dbe9c03 100644
+--- a/index.html
++++ b/index.html
+@@ -11,7 +11,7 @@
+         <script>
+             // https://stackoverflow.com/questions/20256760/javascript-console-log-to-html
+             (function () {
+-                var logger = document.getElementById('log');
++                const logger = document.getElementById('log');
+                 console.log = function (message) {
+                     if (typeof message == 'object') {
+                         logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+diff --git a/index.js b/index.js
+index 0dfa5d6..002168d 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,4 @@
+ // index.js
+ import moment from 'moment';
+-console.log('Hello from JavaScript!');
++console.log('Hello from JavaScript and weback server!');
+ console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index babd80f..a773e99 100644
+--- a/package.json
++++ b/package.json
+@@ -4,8 +4,12 @@
+   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+   "main": "index.js",
+   "scripts": {
+-    "bundle": "webpack",
+-    "test": "echo \"Error: no test specified\" && exit 1"
++    "bundle": "npm run build",
++    "build": "webpack --progress -p",
++    "watch": "webpack --progress --watch",
++    "test": "echo \"Error: no test specified\" && exit 1",
++    "server": "webpack-dev-server --open",
++    "start": "npm run server"
+   },
+   "repository": {
+     "type": "git",
+@@ -29,6 +33,7 @@
+     "babel-core": "6.26.0",
+     "babel-loader": "7.1.2",
+     "babel-preset-env": "1.6.1",
+-    "webpack": "3.8.1"
++    "webpack": "3.8.1",
++    "webpack-dev-server": "2.9.3"
+   }
+ }

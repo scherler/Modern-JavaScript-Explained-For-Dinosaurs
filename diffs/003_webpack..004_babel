@@ -1,0 +1,80 @@
+diff --git a/README.md b/README.md
+index 6fb6114..25d1621 100644
+--- a/README.md
++++ b/README.md
+@@ -55,4 +55,12 @@ No special changes besides the names.
+ 
+ No special changes besides adding bundle command to package.json. `npm run bundle`
+ 
+-**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
+\ No newline at end of file
++**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
++
++## Transpiling code for new language features (babel)
++
++**Branch: [babel](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/004_babel)**
++
++No special changes.
++
++**[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
+diff --git a/diffs/003_webpack..004_babel b/diffs/003_webpack..004_babel
+new file mode 100644
+index 0000000..e69de29
+diff --git a/index.js b/index.js
+index 1fcd0b3..0dfa5d6 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,4 @@
+ // index.js
+-const moment = require('moment');
++import moment from 'moment';
+ console.log('Hello from JavaScript!');
+-console.log('startOf("day").fromNow(): ' + moment().startOf('day').fromNow());
+\ No newline at end of file
++console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 2f7c1d6..babd80f 100644
+--- a/package.json
++++ b/package.json
+@@ -26,6 +26,9 @@
+     "moment": "2.19.1"
+   },
+   "devDependencies": {
++    "babel-core": "6.26.0",
++    "babel-loader": "7.1.2",
++    "babel-preset-env": "1.6.1",
+     "webpack": "3.8.1"
+   }
+ }
+diff --git a/webpack.config.js b/webpack.config.js
+index 9bdf93b..9f37005 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1,7 +1,21 @@
+ // webpack.config.js
+ module.exports = {
+-  entry: './index.js',
+-  output: {
+-    filename: 'bundle.js'
+-  }
++    entry: './index.js',
++    output: {
++        filename: 'bundle.js'
++    },
++    module: {
++        rules: [
++            {
++                test: /\.js$/,
++                exclude: /node_modules/,
++                use: {
++                    loader: 'babel-loader',
++                    options: {
++                        presets: ['env']
++                    }
++                }
++            }
++        ]
++    }
+ };
+\ No newline at end of file

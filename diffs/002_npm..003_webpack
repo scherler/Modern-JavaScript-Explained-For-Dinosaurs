@@ -8,7 +8,7 @@ index 2bdd604..33b4823 100644
  /.idea/
 +/bundle.js
 diff --git a/README.md b/README.md
-index 70f7d37..eb2948f 100644
+index 70f7d37..6fb6114 100644
 --- a/README.md
 +++ b/README.md
 @@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
@@ -20,7 +20,7 @@ index 70f7d37..eb2948f 100644
  
  Showing how you do things with works with browser only, meaning no need for an httpd style server.
  
-@@ -43,6 +43,8 @@ Some changes I added had been to override console.log to output to a div on the
+@@ -43,6 +43,16 @@ Some changes I added had been to override console.log to output to a div on the
  
  ## Using a JavaScript package manager (npm)
  
@@ -32,6 +32,14 @@ index 70f7d37..eb2948f 100644
 +No special changes besides the names.
 +
 +**[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
++
++## Using a JavaScript module bundler (webpack)
++
++**Branch: [webpack](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/003_webpack)**
++
++No special changes besides adding bundle command to package.json. `npm run bundle`
++
++**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
 \ No newline at end of file
 diff --git a/diffs/001_oldSchool..002_npm b/diffs/001_oldSchool..002_npm
 new file mode 100644
@@ -112,6 +120,192 @@ index 0000000..13189cf
 ++    "moment": "2.19.1"
 ++  }
 ++}
+diff --git a/diffs/002_npm..003_webpack b/diffs/002_npm..003_webpack
+new file mode 100644
+index 0000000..7179d91
+--- /dev/null
++++ b/diffs/002_npm..003_webpack
+@@ -0,0 +1,180 @@
++diff --git a/.gitignore b/.gitignore
++index 2bdd604..33b4823 100644
++--- a/.gitignore
+++++ b/.gitignore
++@@ -58,3 +58,4 @@ typings/
++ .env
++ 
++ /.idea/
+++/bundle.js
++diff --git a/README.md b/README.md
++index 70f7d37..eb2948f 100644
++--- a/README.md
+++++ b/README.md
++@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
++ 
++ ## Using JavaScript the “old-school” way
++ 
++-**Branch: (oldSchool)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool]**
+++**Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/001_oldSchool)**
++ 
++ Showing how you do things with works with browser only, meaning no need for an httpd style server.
++ 
++@@ -43,6 +43,8 @@ Some changes I added had been to override console.log to output to a div on the
++ 
++ ## Using a JavaScript package manager (npm)
++ 
++-**Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
+++**Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/002_npm)**
++ 
++-No special changes besides the names.
++\ No newline at end of file
+++No special changes besides the names.
+++
+++**[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
++\ No newline at end of file
++diff --git a/diffs/001_oldSchool..002_npm b/diffs/001_oldSchool..002_npm
++new file mode 100644
++index 0000000..13189cf
++--- /dev/null
+++++ b/diffs/001_oldSchool..002_npm
++@@ -0,0 +1,73 @@
+++diff --git a/README.md b/README.md
+++index db40ed2..70f7d37 100644
+++--- a/README.md
++++++ b/README.md
+++@@ -5,7 +5,7 @@ This repository will implement the article and link to the corresponding commits
+++ 
+++ ## Using JavaScript the “old-school” way
+++ 
+++-**Branch: oldSchool**
++++**Branch: (oldSchool)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/oldSchool]**
+++ 
+++ Showing how you do things with works with browser only, meaning no need for an httpd style server.
+++ 
+++@@ -39,4 +39,10 @@ Some changes I added had been to override console.log to output to a div on the
+++         <script src="index.js"></script>
+++     </body>
+++ </html>
+++-```
+++\ No newline at end of file
++++```
++++
++++## Using a JavaScript package manager (npm)
++++
++++**Branch: (npm)[https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/npm]**
++++
++++No special changes besides the names.
+++\ No newline at end of file
+++diff --git a/index.html b/index.html
+++index 381bc5c..2025bf4 100644
+++--- a/index.html
++++++ b/index.html
+++@@ -3,7 +3,7 @@
+++     <head>
+++         <meta charset="UTF-8">
+++         <title>JavaScript Example</title>
+++-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
++++        <script src="node_modules/moment/min/moment.min.js"></script>
+++     </head>
+++     <body>
+++         <h1>Hello from HTML!</h1>
+++diff --git a/package.json b/package.json
+++new file mode 100644
+++index 0000000..1447c64
+++--- /dev/null
++++++ b/package.json
+++@@ -0,0 +1,27 @@
++++{
++++  "name": "modern-js4dinosaurs",
++++  "version": "1.0.0",
++++  "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
++++  "main": "index.js",
++++  "scripts": {
++++    "test": "echo \"Error: no test specified\" && exit 1"
++++  },
++++  "repository": {
++++    "type": "git",
++++    "url": "git+https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs.git"
++++  },
++++  "keywords": [
++++    "tutorial",
++++    "npm",
++++    "javascript"
++++  ],
++++  "author": "Thorsten Scherler",
++++  "license": "ISC",
++++  "bugs": {
++++    "url": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/issues"
++++  },
++++  "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
++++  "dependencies": {
++++    "moment": "2.19.1"
++++  }
++++}
++diff --git a/index.html b/index.html
++index 2025bf4..99a64f9 100644
++--- a/index.html
+++++ b/index.html
++@@ -3,7 +3,6 @@
++     <head>
++         <meta charset="UTF-8">
++         <title>JavaScript Example</title>
++-        <script src="node_modules/moment/min/moment.min.js"></script>
++     </head>
++     <body>
++         <h1>Hello from HTML!</h1>
++@@ -22,6 +21,6 @@
++                 }
++             })();
++         </script>
++-        <script src="index.js"></script>
+++        <script src="bundle.js"></script>
++     </body>
++ </html>
++\ No newline at end of file
++diff --git a/index.js b/index.js
++index 95dc213..1fcd0b3 100644
++--- a/index.js
+++++ b/index.js
++@@ -1,3 +1,4 @@
++ // index.js
+++const moment = require('moment');
++ console.log('Hello from JavaScript!');
++ console.log('startOf("day").fromNow(): ' + moment().startOf('day').fromNow());
++\ No newline at end of file
++diff --git a/package.json b/package.json
++index 1447c64..2f7c1d6 100644
++--- a/package.json
+++++ b/package.json
++@@ -4,6 +4,7 @@
++   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
++   "main": "index.js",
++   "scripts": {
+++    "bundle": "webpack",
++     "test": "echo \"Error: no test specified\" && exit 1"
++   },
++   "repository": {
++@@ -23,5 +24,8 @@
++   "homepage": "https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs#readme",
++   "dependencies": {
++     "moment": "2.19.1"
+++  },
+++  "devDependencies": {
+++    "webpack": "3.8.1"
++   }
++ }
++diff --git a/webpack.config.js b/webpack.config.js
++new file mode 100644
++index 0000000..9bdf93b
++--- /dev/null
+++++ b/webpack.config.js
++@@ -0,0 +1,7 @@
+++// webpack.config.js
+++module.exports = {
+++  entry: './index.js',
+++  output: {
+++    filename: 'bundle.js'
+++  }
+++};
++\ No newline at end of file
 diff --git a/index.html b/index.html
 index 2025bf4..99a64f9 100644
 --- a/index.html

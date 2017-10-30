@@ -1,7 +1,8 @@
 # Modern-JavaScript-Explained-For-Dinosaurs
-based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70
 
-This repository will implement the article and link to the corresponding commits/branches.
+**based on the article of [Peter Jang, Modern JavaScript Explained For Dinosaurs](https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70)**
+
+This repository will implement the article and link to the corresponding commits/branches. You should be able to read along the article and follow the corresponding branches.
 
 To see the current master branch in action you need to run
 

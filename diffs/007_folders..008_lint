@@ -1,0 +1,158 @@
+diff --git a/.eslintrc b/.eslintrc
+new file mode 100644
+index 0000000..ab176b2
+--- /dev/null
++++ b/.eslintrc
+@@ -0,0 +1,21 @@
++{
++  "env": {
++    "browser": true,
++    "commonjs": true,
++    "es6": true,
++    "node": true,
++  },
++  "extends": "eslint:recommended",
++  "parserOptions": {
++    "sourceType": "module"
++  },
++  "rules": {
++    "comma-dangle": ["error", "always-multiline"],
++    "indent": ["error", 2],
++    "linebreak-style": ["error", "unix"],
++    "quotes": ["error", "single"],
++    "semi": ["error", "always"],
++    "no-unused-vars": ["error"],
++    "no-console": 0
++  }
++}
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 3514e1f..63fa4df 100644
+--- a/package.json
++++ b/package.json
+@@ -6,6 +6,7 @@
+   "scripts": {
+     "bundle": "npm run build",
+     "build": "webpack --progress -p",
++    "lint": "eslint src/js",
+     "watch": "webpack --progress --watch",
+     "test": "echo \"Error: no test specified\" && exit 1",
+     "server": "webpack-dev-server --open",
+@@ -34,6 +35,8 @@
+     "babel-loader": "7.1.2",
+     "babel-preset-env": "1.6.1",
+     "css-loader": "0.28.7",
++    "eslint": "4.10.0",
++    "eslint-loader": "1.9.0",
+     "extract-text-webpack-plugin": "3.0.2",
+     "less": "2.7.3",
+     "less-loader": "4.0.5",
+diff --git a/part2.md b/part2.md
+index 2a6ce7b..9fb3175 100644
+--- a/part2.md
++++ b/part2.md
+@@ -82,3 +82,73 @@ You will find `[name]` and `[id]` in the configuration file.
+ - `[id]` is replaced by the id of the chunk.
+ - `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
+ 
++## Keep your code clean (lint)
++
++Linting is one of those techniques that can help you make fewer mistakes while coding JavaScript. You can spot issues before they become actual problems. Modern editors and IDEs offer strong support for popular tools allowing you to detect possible issues as you are developing.
++
++```npm
++npm install eslint eslint-loader --save-dev
++```
++
++Basic config file .eslintrc.js:
++
++```json
++{
++  "env": {
++    "browser": true,
++    "commonjs": true,
++    "es6": true,
++    "node": true,
++  },
++  "extends": "eslint:recommended",
++  "parserOptions": {
++    "sourceType": "module"
++  },
++  "rules": {
++    "comma-dangle": ["error", "always-multiline"],
++    "indent": ["error", 2],
++    "linebreak-style": ["error", "unix"],
++    "quotes": ["error", "single"],
++    "semi": ["error", "always"],
++    "no-unused-vars": ["error"],
++    "no-console": 0
++  }
++}
++```
++
++Can be run via `npm run lint` with adding in the script section of **package.json**:
++
++```json
++{
++  "scripts": {
++    "lint": "eslint src/js"
++  }
++}
++```
++
++Linting early while development has the benefit that you are forced to write correct code every time you save. 
++
++In **webpack.config.js** you need to define a new loader:
++
++```
++{
++    enforce: "pre",
++    test: /\.js$/,
++    exclude: /node_modules/,
++    use: 'eslint-loader',
++}
++```
++
++This will provoke the wepack bundeling to fail. 
++
++To see the error not only in the terminal console but as well in the browser (aka error overlay) we need to add a new section:
++
++```
++devServer: {
++ // overlay: true is equivalent
++  overlay: {
++    errors: true,
++    warnings: true,
++  }
++}
++```
+diff --git a/webpack.config.js b/webpack.config.js
+index edc7c35..388ffd1 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -2,6 +2,13 @@
+ const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
+ const extractLess = new ExtractTextPlugin("dist/[name].css");
+ module.exports = {
++    devServer: {
++         // overlay: true is equivalent
++      overlay: {
++        errors: true,
++        warnings: true,
++      }
++    },
+     entry: {
+         index: './src/js/index.js',
+     },
+@@ -12,6 +19,12 @@ module.exports = {
+     module: {
+         rules: [
+             {
++                enforce: "pre",
++                test: /\.js$/,
++                exclude: /node_modules/,
++                use: 'eslint-loader',
++            },
++            {
+                 test: /\.js$/,
+                 exclude: /node_modules/,
+                 use: {

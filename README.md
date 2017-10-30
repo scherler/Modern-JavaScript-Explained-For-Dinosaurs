@@ -48,3 +48,11 @@ Some changes I added had been to override console.log to output to a div on the 
 No special changes besides the names.
 
 **[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
+
+## Using a JavaScript module bundler (webpack)
+
+**Branch: [webpack](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/003_webpack)**
+
+No special changes besides adding bundle command to package.json. `npm run bundle`
+
+**[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`

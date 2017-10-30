@@ -87,6 +87,68 @@ You will find `[name]` and `[id]` in the configuration file.
 Linting is one of those techniques that can help you make fewer mistakes while coding JavaScript. You can spot issues before they become actual problems. Modern editors and IDEs offer strong support for popular tools allowing you to detect possible issues as you are developing.
 
 ```npm
-npm install eslint --save-dev
+npm install eslint eslint-loader --save-dev
 ```
 
+Basic config file .eslintrc.js:
+
+```json
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true,
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "comma-dangle": ["error", "always-multiline"],
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "no-unused-vars": ["error"],
+    "no-console": 0
+  }
+}
+```
+
+Can be run via `npm run lint` with adding in the script section of **package.json**:
+
+```json
+{
+  "scripts": {
+    "lint": "eslint src/js"
+  }
+}
+```
+
+Linting early while development has the benefit that you are forced to write correct code every time you save. 
+
+In **webpack.config.js** you need to define a new loader:
+
+```
+{
+    enforce: "pre",
+    test: /\.js$/,
+    exclude: /node_modules/,
+    use: 'eslint-loader',
+}
+```
+
+This will provoke the wepack bundeling to fail. 
+
+To see the error not only in the terminal console but as well in the browser (aka error overlay) we need to add a new section:
+
+```
+devServer: {
+ // overlay: true is equivalent
+  overlay: {
+    errors: true,
+    warnings: true,
+  }
+}
+```

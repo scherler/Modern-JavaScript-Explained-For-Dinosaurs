@@ -2,6 +2,13 @@
 const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
 const extractLess = new ExtractTextPlugin("dist/[name].css");
 module.exports = {
+    devServer: {
+         // overlay: true is equivalent
+      overlay: {
+        errors: true,
+        warnings: true,
+      }
+    },
     entry: {
         index: './src/js/index.js',
     },
@@ -11,6 +18,12 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                enforce: "pre",
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: 'eslint-loader',
+            },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,

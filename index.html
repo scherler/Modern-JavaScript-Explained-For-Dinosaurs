@@ -3,8 +3,6 @@
     <head>
         <meta charset="UTF-8">
         <title>JavaScript Example</title>
-        <!-- generated the css we want to use -->
-        <script src="dist/common.js"></script>
         <!-- link the generated css -->
         <link href="dist/common.css" rel="stylesheet" title="Default Style"/>
     </head>
@@ -12,6 +10,7 @@
         <h1>Hello from HTML!</h1>
         <div>Console.log here:</div>
         <div id="log"></div>
+        <div id="react"></div>
         <script>
             // https://stackoverflow.com/questions/20256760/javascript-console-log-to-html
             (function () {
@@ -25,6 +24,8 @@
                 }
             })();
         </script>
+        <!-- generated the css we want to use AND mount React -->
+        <script src="dist/common.js"></script>
         <script src="dist/index.js"></script>
     </body>
 </html>

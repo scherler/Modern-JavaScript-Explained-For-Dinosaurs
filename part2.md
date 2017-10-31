@@ -328,3 +328,87 @@ We simply declare a new npm script as follows.
 ```json
 "test:watch": "jest --watch",
 ```
+
+## Using react components ([react](https://facebook.github.io/react/))
+
+**Branch: [react](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/010_react)**
+
+**[Diff](./diffs/009_tests..010_react)** `git diff 009_tests..010_react`
+
+There exist different definition of what react is. React is often described as “the V in the MVC structure”. 
+This also happens to be the least tangible explanation one could give a newcomer, as (V)iews are typically
+logic-less files that are driven by a controller. Further, frameworks like Angular, Backbone, Ember, and more 
+already have sufficient view layers — which then begs the question, why do we need to replace the V in MVC with React?
+                                                   
+The answer is that React doesn’t necessarily want to replace our views — it wants to augment them by allowing you to create 
+highly reusable UI components (tab bars, comment boxes, pop up modals, lists, sortable tables, etc).
+
+In other words, the big idea behind React is this: what if you could create your own HTML element that has customized 
+functionality? For example, one could make a <CommentBox> element that would display a textarea, run validations on the 
+text typed into the textarea, submits the form when the enter key is pressed, etc — all just by including one line of code: 
+<CommentBox></CommentBox>. (For those of you coming from the Angular world, you can think of React Components as a close analogy to Directives).
+
+When I first got in touch with react I thought it would be like **XML**, since I have a strong background in XSL, XML et.al..
+...but I soon had to learn that they have **nothing in common**.
+
+### First render with react
+
+Let us now create a first integration which we will further enhance later on. Our first stab is to inject all dependencies
+in our components, the steps to do so are the following:
+
+- tell `babel` about the special syntax that react brings to the plate. In our `.babelrc` we need to add a new preset 
+```json
+{
+  "presets": ["env"]
+  "presets": ["env", "react"]
+}
+```
+- tell `eslint` about the special syntax that react brings to the plate. In our `.eslintrc` we need to add a new parser, 
+extend the rules for react and add the react pluggin
+```json
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "comma-dangle": ["error", "always-multiline"],
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "no-unused-vars": ["error"],
+    "no-console": 0
+  },
+  "plugins": ["react"]
+}
+```
+- install the following npm packages
+```npm
+npm i -S -E react react-dom
+npm i -D -E babel-eslint babel-preset-react eslint-plugin-react
+
+```
+- extend our `common.js` 
+```javascript
+import '../less/index.less'; // tell webpack to request the transpiling of less to css
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const root = document.getElementById('react');
+ReactDOM.render(<div>Hello React!</div>, root);
+```
+- as you can see we are trying to render React in element with the id `react`. That needs to be added to our index.html
+```html
+<div id="react"></div>
+```

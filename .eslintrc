@@ -1,11 +1,15 @@
 {
+  "parser": "babel-eslint",
   "env": {
     "browser": true,
     "commonjs": true,
     "es6": true,
-    "node": true,
+    "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
   "parserOptions": {
     "sourceType": "module"
   },
@@ -17,5 +21,6 @@
     "semi": ["error", "always"],
     "no-unused-vars": ["error"],
     "no-console": 0
-  }
+  },
+  "plugins": ["react"]
 }

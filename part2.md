@@ -263,3 +263,68 @@ To wrap up we will change our bundle npm script to only bundle if we pass lintin
 "bundle": "npm run lint && npm test && npm run build",
 ```
 
+## add code coverage, configure jest
+
+There are many ways to configure jest to your specific needs, 
+however to activate code coverage we actually do not need to create a config or such. 
+We can simply pass a flag to `jest` in our `package.json` which actually is one form of configure `jest`.
+
+```npm
+"test": "jest --coverage",
+```
+
+You can find all different ways to [configure](https://facebook.github.io/jest/docs/en/configuration.html) jest in their documentation.
+In this tutorial we will concentrate on the `package.json`.
+
+Instead to use the above flag we can extend our `package.json` and add a new "top-level" child like:
+
+```json
+{
+    "name": "modern-js4dinosaurs",
+    "jest": {
+        "collectCoverage": true
+    }   
+}
+```
+
+You can use different test reporters but we will show how to use the [junit](http://junit.org/) format which is widely 
+supported by different tools like e.g. [jenkins](https://jenkins.io/). 
+
+```json
+{
+    "name": "modern-js4dinosaurs",
+    "jest": {
+        "collectCoverage": true,
+        "testResultsProcessor": "jest-junit"
+    },
+    "jest-junit": {
+        "suiteName": "tests for modern javascript",
+        "output": "./dist/junit.xml",
+        "classNameTemplate": "{classname}",
+        "titleTemplate": "{title}",
+        "usePathForSuiteName": "true"
+    }  
+}
+```
+
+### TDD - test driven development
+
+Test-driven development (TDD) is a software development process that relies on the repetition of a very short development cycle: first the developer writes an (initially failing) automated test case that defines a desired improvement or new function, then produces the minimum amount of code to pass that test, and finally refactors the new code to acceptable standards.
+
+The following sequence of steps is generally followed:
+
+- Add a test
+- Run all tests and see if the new one fails
+- Write some code
+- Run tests
+- Refactor code
+- Repeat
+
+`jest` comes out-of-the-box with the support to watch all test files and in case they change it will run the test again. 
+This allows to concentrate on coding and simply have the terminal in sight to see when tests are failing.
+
+We simply declare a new npm script as follows.
+
+```json
+"test:watch": "jest --watch",
+```

@@ -2,7 +2,7 @@
 
 This part is not covered in the article but I wanted to complete the step to step until we have a full runnning React.js application.
 
-## Using less to transpile to css
+## Using less to transpile to css ([less](http://lesscss.org/))
 
 **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/006_less)**
 
@@ -69,7 +69,7 @@ module.exports = {
 };
 ```
 
-## Organize the code (folders)
+## Organize the code ([folders](https://github.com/webpack/docs/wiki/configuration))
 
 **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/007_folders)**
 
@@ -82,7 +82,7 @@ You will find `[name]` and `[id]` in the configuration file.
 - `[id]` is replaced by the id of the chunk.
 - `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
 
-## Keep your code clean (lint)
+## Keep your code clean ([lint](https://eslint.org/))
 **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/008_lint)**
 
 **[Diff](./diffs/007_folders..008_lint)** `git diff 007_folders..008_lint`
@@ -101,7 +101,7 @@ Basic config file .eslintrc.js:
     "browser": true,
     "commonjs": true,
     "es6": true,
-    "node": true,
+    "node": true
   },
   "extends": "eslint:recommended",
   "parserOptions": {
@@ -155,3 +155,4 @@ devServer: {
   }
 }
 ```
+

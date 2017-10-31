@@ -50,7 +50,7 @@ Some changes I added had been to override console.log to output to a div on the 
 </html>
 ```
 
-## Using a JavaScript package manager (npm)
+## Using a JavaScript package manager ([npm](https://www.npmjs.com))
 
 **Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/002_npm)**
 
@@ -58,7 +58,7 @@ No special changes besides the names.
 
 **[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
 
-## Using a JavaScript module bundler (webpack)
+## Using a JavaScript module bundler ([webpack](https://webpack.github.io/))
 
 **Branch: [webpack](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/003_webpack)**
 
@@ -66,7 +66,7 @@ No special changes besides adding bundle command to package.json. `npm run bundl
 
 **[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
 
-## Transpiling code for new language features (babel)
+## Transpiling code for new language features ([babel](https://babeljs.io/))
 
 **Branch: [babel](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/004_babel)**
 
@@ -74,7 +74,7 @@ No special changes.
 
 **[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
 
-## Using a task runner (npm scripts)
+## Using a task runner ([npm scripts](https://docs.npmjs.com/misc/scripts))
 
 **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/005_scripts)**
 
@@ -85,4 +85,4 @@ No special changes besides to show how to link scripts in npm and implement "sta
 
 # Want more examples
 
-[part2](./part2.md)
+[part2](./part2.md) will explain how to add things like linting, testing many more.

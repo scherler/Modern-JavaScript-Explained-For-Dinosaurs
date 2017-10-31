@@ -11,6 +11,7 @@ module.exports = {
     },
     entry: {
         index: './src/js/index.js',
+        common: './src/js/common.js',
     },
     output: {
         filename: 'dist/[name].js',
@@ -27,12 +28,7 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['env']
-                    }
-                }
+                use: 'babel-loader'
             },
             {
                 test: /\.css$/,

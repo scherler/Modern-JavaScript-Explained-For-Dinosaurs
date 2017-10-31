@@ -412,3 +412,62 @@ ReactDOM.render(<div>Hello React!</div>, root);
 ```html
 <div id="react"></div>
 ```
+
+### Enhance bundle size
+
+Our current bundle size has grown quite a bit, even if we have really not much javascript developed. 
+So common.js is around 115kB and index.js has grown to 252kB. That does not sound much at the moment but 
+as more dependencies we are using the bigger the bundles for each page are growing.
+
+The solution is to tell webpack that we will use some common libaries like react and moment as external files
+so webpack will not bundle them into our different files.
+
+First install the following npm package
+```npm
+npm i -D -E expose-loader
+
+```
+
+For that we need to change our `entry` section webpack.config.js to the following, which is using the `expose-loader` which adds 
+modules to the global object:
+
+```json
+entry: {
+    "vendor": [
+      "expose-loader?React!react",
+      "expose-loader?ReactDOM!react-dom",
+      "expose-loader?moment!moment",
+    ],
+    index: './src/js/index.js',
+    common: './src/js/common.js',
+},
+```
+
+and add a new section `externals` to the same file which tell webpack
+that we do not want to bundle those libraries:
+
+```json
+externals: {
+    // Use external version of React
+    "react": "React",
+    "react-dom": "ReactDOM",
+    "moment": "moment"
+},
+```
+
+From here we can either use a `CDN` of those external libs or we can include the vendor bundle
+in our index.html:
+
+```html
+<script src="dist/vendor.js"></script>
+```
+
+That has the effect that our page bundles (index and common) had been 
+reduced to around 800 bytes and the vendor bundle containing all our deps 
+with 370 kB. 
+ 
+By separating common modules from bundles, the resulting chunked 
+file can be loaded once initially, and stored in cache for later use. 
+This results in pagespeed optimizations as the browser can quickly serve the shared 
+code from cache, rather than being forced to load a larger bundle whenever a new page is visited.
+

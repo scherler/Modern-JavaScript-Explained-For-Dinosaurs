@@ -1,4 +1,5 @@
 // webpack.config.js
+const webpack = require('webpack');
 const ExtractTextPlugin = require("extract-text-webpack-plugin"); // allows to extract the generated css out of the bundle
 const extractLess = new ExtractTextPlugin("dist/[name].css");
 module.exports = {
@@ -10,6 +11,11 @@ module.exports = {
       }
     },
     entry: {
+        "vendor": [
+          "expose-loader?React!react",
+          "expose-loader?ReactDOM!react-dom",
+          "expose-loader?moment!moment",
+        ],
         index: './src/js/index.js',
         common: './src/js/common.js',
     },
@@ -50,6 +56,19 @@ module.exports = {
             },
         ],
     },
+    externals: {
+        // Use external version of React
+        "react": "React",
+        "react-dom": "ReactDOM",
+        "moment": "moment"
+    },
     // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
-    plugins: [ extractLess ],
+    plugins: [
+        extractLess,
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "vendor",
+            minChunks: Infinity,
+            async: true
+        })
+    ]
 };

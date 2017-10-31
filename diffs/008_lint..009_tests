@@ -1,0 +1,430 @@
+diff --git a/.babelrc b/.babelrc
+new file mode 100644
+index 0000000..002b4aa
+--- /dev/null
++++ b/.babelrc
+@@ -0,0 +1,3 @@
++{
++  "presets": ["env"]
++}
+diff --git a/README.md b/README.md
+index 765e943..7a09108 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # Modern-JavaScript-Explained-For-Dinosaurs
+ 
+-**based on the article of [Peter Jang, Modern JavaScript Explained For Dinosaurs](https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70)**
++**First part based on the article of [Peter Jang, Modern JavaScript Explained For Dinosaurs](https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70)**
+ 
+ This repository will implement the article and link to the corresponding commits/branches. You should be able to read along the article and follow the corresponding branches.
+ 
+@@ -10,6 +10,8 @@ To see the current master branch in action you need to run
+ npm i && npm start
+ ```
+ 
++The second part will add some more common development tools to the mix until you created your first real modern webapp.
++
+ ## Using JavaScript the “old-school” way
+ 
+ **Branch: [oldSchool](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/001_oldSchool)**
+@@ -48,7 +50,7 @@ Some changes I added had been to override console.log to output to a div on the
+ </html>
+ ```
+ 
+-## Using a JavaScript package manager (npm)
++## Using a JavaScript package manager ([npm](https://www.npmjs.com))
+ 
+ **Branch: [npm](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/002_npm)**
+ 
+@@ -56,7 +58,7 @@ No special changes besides the names.
+ 
+ **[Diff](./diffs/001_oldSchool..002_npm)** `git diff 001_oldSchool..002_npm`
+ 
+-## Using a JavaScript module bundler (webpack)
++## Using a JavaScript module bundler ([webpack](https://webpack.github.io/))
+ 
+ **Branch: [webpack](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/003_webpack)**
+ 
+@@ -64,7 +66,7 @@ No special changes besides adding bundle command to package.json. `npm run bundl
+ 
+ **[Diff](./diffs/002_npm..003_webpack)** `git diff 002_npm..003_webpack`
+ 
+-## Transpiling code for new language features (babel)
++## Transpiling code for new language features ([babel](https://babeljs.io/))
+ 
+ **Branch: [babel](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/004_babel)**
+ 
+@@ -72,7 +74,7 @@ No special changes.
+ 
+ **[Diff](./diffs/003_webpack..004_babel)** `git diff 003_webpack..004_babel`
+ 
+-## Using a task runner (npm scripts)
++## Using a task runner ([npm scripts](https://docs.npmjs.com/misc/scripts))
+ 
+ **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/005_scripts)**
+ 
+@@ -83,4 +85,4 @@ No special changes besides to show how to link scripts in npm and implement "sta
+ 
+ # Want more examples
+ 
+-[part2](./part2.md)
+\ No newline at end of file
++[part2](./part2.md) will explain how to add things like linting, testing many more.
+\ No newline at end of file
+diff --git a/index.html b/index.html
+index 306db4d..75ca0ea 100644
+--- a/index.html
++++ b/index.html
+@@ -3,8 +3,10 @@
+     <head>
+         <meta charset="UTF-8">
+         <title>JavaScript Example</title>
+-        <!-- the generated css we want to use -->
+-        <link href="dist/index.css" rel="stylesheet" title="Default Style"/>
++        <!-- generated the css we want to use -->
++        <script src="dist/common.js"></script>
++        <!-- link the generated css -->
++        <link href="dist/common.css" rel="stylesheet" title="Default Style"/>
+     </head>
+     <body>
+         <h1>Hello from HTML!</h1>
+diff --git a/package.json b/package.json
+index 63fa4df..041617d 100644
+--- a/package.json
++++ b/package.json
+@@ -4,11 +4,12 @@
+   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+   "main": "index.js",
+   "scripts": {
+-    "bundle": "npm run build",
++    "bundle": "npm run lint && npm test && npm run build",
++    "bundle:watch": "webpack --progress --watch",
+     "build": "webpack --progress -p",
+     "lint": "eslint src/js",
+-    "watch": "webpack --progress --watch",
+-    "test": "echo \"Error: no test specified\" && exit 1",
++    "test": "jest",
++    "test:watch": "jest --watch",
+     "server": "webpack-dev-server --open",
+     "start": "npm run server"
+   },
+@@ -38,10 +39,23 @@
+     "eslint": "4.10.0",
+     "eslint-loader": "1.9.0",
+     "extract-text-webpack-plugin": "3.0.2",
++    "jest": "21.2.1",
++    "jest-junit": "3.1.0",
+     "less": "2.7.3",
+     "less-loader": "4.0.5",
+     "style-loader": "0.19.0",
+     "webpack": "3.8.1",
+     "webpack-dev-server": "2.9.3"
++  },
++  "jest": {
++    "collectCoverage": true,
++    "testResultsProcessor": "jest-junit"
++  },
++  "jest-junit": {
++    "suiteName": "tests for modern javascript",
++    "output": "./dist/junit.xml",
++    "classNameTemplate": "{classname}",
++    "titleTemplate": "{title}",
++    "usePathForSuiteName": "true"
+   }
+ }
+diff --git a/part2.md b/part2.md
+index 1ccaab6..142c322 100644
+--- a/part2.md
++++ b/part2.md
+@@ -1,14 +1,16 @@
+ # Part 2
+ 
+-This part is not covered in the article but I wanted to complete the step to step until we have a full runnning React.js application.
++This part is not covered in the article but I wanted to complete the step to step until we have a state-of-the-art js-application. 
++We will cover the remaining areas that every javascript based app should provide to ensure code quality. 
++The last step is to add [react](https://reactjs.org/) which the reader may change to any other given framework like [vue](https://vuejs.org/) et. al.
+ 
+-## Using less to transpile to css
++## Using less to transpile to css ([less](http://lesscss.org/))
+ 
+ **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/006_less)**
+ 
+ **[Diff](./diffs/005_scripts..006_less)** `git diff 005_scripts..006_less`
+ 
+-[Less](http://lesscss.org/) is a CSS pre-processor similar to Sass.
++[Less](http://lesscss.org/) is a CSS pre-processor, meaning that it extends the CSS language, adding features that allow variables, mixins, functions and many other techniques that allow you to make CSS that is more maintainable, themeable and extendable.
+ 
+ Installation
+ 
+@@ -69,7 +71,7 @@ module.exports = {
+ };
+ ```
+ 
+-## Organize the code (folders)
++## Organize the code ([folders](https://github.com/webpack/docs/wiki/configuration))
+ 
+ **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/007_folders)**
+ 
+@@ -82,11 +84,18 @@ You will find `[name]` and `[id]` in the configuration file.
+ - `[id]` is replaced by the id of the chunk.
+ - `[name]` is replaced by the name of the chunk (or with the id when the chunk has no name).
+ 
+-## Keep your code clean (lint)
++## Keep your code clean ([lint](https://eslint.org/))
+ **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/008_lint)**
+ 
+ **[Diff](./diffs/007_folders..008_lint)** `git diff 007_folders..008_lint`
+ 
++
++Code linting is a type of static analysis that is frequently used to find problematic patterns or code that doesn’t adhere to certain style guidelines. There are code linters for most programming languages, and compilers sometimes incorporate linting into the compilation process.
++
++JavaScript, being a dynamic and loosely-typed language, is especially prone to developer error. Without the benefit of a compilation process, JavaScript code is typically executed in order to find syntax or other errors. Linting tools like ESLint allow developers to discover problems with their JavaScript code without executing it.
++
++The primary reason ESLint was created was to allow developers to create their own linting rules. ESLint is designed to have all rules completely pluggable. The default rules are written just like any plugin rules would be. They can all follow the same pattern, both for the rules themselves as well as tests. While ESLint will ship with some built-in rules to make it useful from the start, you’ll be able to dynamically load rules at any point in time.
++
+ Linting is one of those techniques that can help you make fewer mistakes while coding JavaScript. You can spot issues before they become actual problems. Modern editors and IDEs offer strong support for popular tools allowing you to detect possible issues as you are developing.
+ 
+ ```npm
+@@ -101,7 +110,7 @@ Basic config file .eslintrc.js:
+     "browser": true,
+     "commonjs": true,
+     "es6": true,
+-    "node": true,
++    "node": true
+   },
+   "extends": "eslint:recommended",
+   "parserOptions": {
+@@ -155,3 +164,167 @@ devServer: {
+   }
+ }
+ ```
++
++## Prevent regressions with tests ([jest](https://facebook.github.io/jest/))
++
++**Branch: [tests](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/009_tests)**
++
++**[Diff](./diffs/008_lint..009_tests)** `git diff 008_lint..009_tests`
++
++There are many different plattforms to write tests. 
++The article [An Overview of JavaScript Testing in 2017](https://medium.com/powtoon-engineering/a-complete-guide-to-testing-javascript-in-2017-a217b4cd5a2a) 
++explains the different types of tests:
++
++- **Unit Tests** Testing of individual functions or classes by mocking input and making sure the output is as expected.
++- **Integration Tests** Testing several modules to ensure they work together as expected.
++- **Functional Tests** Testing a scenario on the product itself (on the browser, for example) regardless of the internal structure to ensure expected behavior.
++
++The two most common test frameworks in the javascript world are probably [mocha](https://github.com/mochajs/mocha) and [jest](https://facebook.github.io/jest/). 
++I have used both for a while and lately am using more jest due to the code coverage feature and the parallelized test runs across workers to maximize performance.
++
++### Steps to follow
++To support the jest testing without any config we need to prepare/change our project structure a bit. First of all we need to isolate the import from the less files which is triggering the generation of our css.
++
++If we leave `import '../less/index.less';` in our index.js we will run into an error in jest, since it does not understand `less`.
++We will move that import to a file on its own `common.js` and create a new `entrypoint` in the webpack config to tell about the new file so it will be bundled. 
++
++That however will not create the `index.css` anymore but now it will generate `common.css`
++Further we will move the babel option that we earlier defined in `webpack.config.js` to a 
++file on its own `.babelrc` to make it globally available. `Jest` will pick up this file and "knows" that we will use ES6.
++
++To have actually something to test we will implement a method in `index.js` and export it.
++
++**.babelrc**
++
++```json
++{
++  "presets": ["env"]
++}
++```
++
++**webpack.config.js** babel loader **BEFORE**
++
++```javascript
++{
++    test: /\.js$/,
++    exclude: /node_modules/,
++    use: {
++        loader: 'babel-loader',
++        options: {
++            presets: ['env']
++        }
++    }
++}
++```
++
++**webpack.config.js** babel loader **AFTER**
++
++```javascript
++{
++    test: /\.js$/,
++    exclude: /node_modules/,
++    use: 'babel-loader'
++}
++```
++
++**index.html** **BEFORE**
++```html
++<link href="dist/index.css" rel="stylesheet" title="Default Style"/>
++```
++
++**index.html** **AFTER**
++```html
++<!-- generated the css we want to use -->
++<script src="dist/common.js"></script>
++<!-- link the generated css -->
++<link href="dist/common.css" rel="stylesheet" title="Default Style"/>
++```
++
++**index.js** new method
++
++```javascript
++export const sum = (a, b) => a + b;
++```
++
++After this preparation we can now create a file `test/index.spec.js` with we will test our new method. Placing it in 
++the test folder and giving it the spec.js extension will tell jest to test this file (no configuration needed).
++
++```javascript
++import { sum } from '../src/js/index';
++describe('Test the index.js', () => {
++    it('adds 1 + 2 to equal 3', () => {
++        expect(sum(1, 2)).toBe(3);
++    })
++});
++```
++
++To wrap up we will change our bundle npm script to only bundle if we pass linting and testing.
++```npm
++"bundle": "npm run lint && npm test && npm run build",
++```
++
++## add code coverage, configure jest
++
++There are many ways to configure jest to your specific needs, 
++however to activate code coverage we actually do not need to create a config or such. 
++We can simply pass a flag to `jest` in our `package.json` which actually is one form of configure `jest`.
++
++```npm
++"test": "jest --coverage",
++```
++
++You can find all different ways to [configure](https://facebook.github.io/jest/docs/en/configuration.html) jest in their documentation.
++In this tutorial we will concentrate on the `package.json`.
++
++Instead to use the above flag we can extend our `package.json` and add a new "top-level" child like:
++
++```json
++{
++    "name": "modern-js4dinosaurs",
++    "jest": {
++        "collectCoverage": true
++    }   
++}
++```
++
++You can use different test reporters but we will show how to use the [junit](http://junit.org/) format which is widely 
++supported by different tools like e.g. [jenkins](https://jenkins.io/). 
++
++```json
++{
++    "name": "modern-js4dinosaurs",
++    "jest": {
++        "collectCoverage": true,
++        "testResultsProcessor": "jest-junit"
++    },
++    "jest-junit": {
++        "suiteName": "tests for modern javascript",
++        "output": "./dist/junit.xml",
++        "classNameTemplate": "{classname}",
++        "titleTemplate": "{title}",
++        "usePathForSuiteName": "true"
++    }  
++}
++```
++
++### TDD - test driven development
++
++Test-driven development (TDD) is a software development process that relies on the repetition of a very short development cycle: first the developer writes an (initially failing) automated test case that defines a desired improvement or new function, then produces the minimum amount of code to pass that test, and finally refactors the new code to acceptable standards.
++
++The following sequence of steps is generally followed:
++
++- Add a test
++- Run all tests and see if the new one fails
++- Write some code
++- Run tests
++- Refactor code
++- Repeat
++
++`jest` comes out-of-the-box with the support to watch all test files and in case they change it will run the test again. 
++This allows to concentrate on coding and simply have the terminal in sight to see when tests are failing.
++
++We simply declare a new npm script as follows.
++
++```json
++"test:watch": "jest --watch",
++```
+\ No newline at end of file
+diff --git a/src/js/common.js b/src/js/common.js
+new file mode 100644
+index 0000000..c72d0ac
+--- /dev/null
++++ b/src/js/common.js
+@@ -0,0 +1 @@
++import '../less/index.less'; // tell webpack to request the transpiling of less to css
+\ No newline at end of file
+diff --git a/src/js/index.js b/src/js/index.js
+index e4fb489..289517c 100644
+--- a/src/js/index.js
++++ b/src/js/index.js
+@@ -1,5 +1,6 @@
+ // index.js
+ import moment from 'moment';
+-import '../less/index.less'; // tell webpack to request the transpiling of less to css
++export const sum = (a, b) => a + b;
+ console.log('Hello from JavaScript and weback server!');
+-console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
+\ No newline at end of file
++console.log(`startOf("day").fromNow(): ${moment().startOf('day').fromNow()}`);
++console.log(`1 + 1 is ${sum(1, 1)}`);
+diff --git a/test/index.spec.js b/test/index.spec.js
+new file mode 100644
+index 0000000..b7bc3dc
+--- /dev/null
++++ b/test/index.spec.js
+@@ -0,0 +1,9 @@
++import { sum } from '../src/js/index';
++describe('Test the index.js', () => {
++    it('adds 1 + 2 to equal 3', () => {
++        expect(sum(1, 2)).toBe(3);
++    });
++    it('adds a + b to equal ab', () => {
++        expect(sum('a', 'b')).toBe('ab');
++    });
++});
+\ No newline at end of file
+diff --git a/webpack.config.js b/webpack.config.js
+index 388ffd1..3588378 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -11,6 +11,7 @@ module.exports = {
+     },
+     entry: {
+         index: './src/js/index.js',
++        common: './src/js/common.js',
+     },
+     output: {
+         filename: 'dist/[name].js',
+@@ -27,12 +28,7 @@ module.exports = {
+             {
+                 test: /\.js$/,
+                 exclude: /node_modules/,
+-                use: {
+-                    loader: 'babel-loader',
+-                    options: {
+-                        presets: ['env']
+-                    }
+-                }
++                use: 'babel-loader'
+             },
+             {
+                 test: /\.css$/,

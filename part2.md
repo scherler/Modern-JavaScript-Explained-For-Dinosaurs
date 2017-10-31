@@ -1,6 +1,8 @@
 # Part 2
 
-This part is not covered in the article but I wanted to complete the step to step until we have a full runnning React.js application.
+This part is not covered in the article but I wanted to complete the step to step until we have a state-of-the-art js-application. 
+We will cover the remaining areas that every javascript based app should provide to ensure code quality. 
+The last step is to add [react](https://reactjs.org/) which the reader may change to any other given framework like [vue](https://vuejs.org/) et. al.
 
 ## Using less to transpile to css ([less](http://lesscss.org/))
 
@@ -8,7 +10,7 @@ This part is not covered in the article but I wanted to complete the step to ste
 
 **[Diff](./diffs/005_scripts..006_less)** `git diff 005_scripts..006_less`
 
-[Less](http://lesscss.org/) is a CSS pre-processor similar to Sass.
+[Less](http://lesscss.org/) is a CSS pre-processor, meaning that it extends the CSS language, adding features that allow variables, mixins, functions and many other techniques that allow you to make CSS that is more maintainable, themeable and extendable.
 
 Installation
 
@@ -86,6 +88,13 @@ You will find `[name]` and `[id]` in the configuration file.
 **Branch: [scripts](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/008_lint)**
 
 **[Diff](./diffs/007_folders..008_lint)** `git diff 007_folders..008_lint`
+
+
+Code linting is a type of static analysis that is frequently used to find problematic patterns or code that doesn’t adhere to certain style guidelines. There are code linters for most programming languages, and compilers sometimes incorporate linting into the compilation process.
+
+JavaScript, being a dynamic and loosely-typed language, is especially prone to developer error. Without the benefit of a compilation process, JavaScript code is typically executed in order to find syntax or other errors. Linting tools like ESLint allow developers to discover problems with their JavaScript code without executing it.
+
+The primary reason ESLint was created was to allow developers to create their own linting rules. ESLint is designed to have all rules completely pluggable. The default rules are written just like any plugin rules would be. They can all follow the same pattern, both for the rules themselves as well as tests. While ESLint will ship with some built-in rules to make it useful from the start, you’ll be able to dynamically load rules at any point in time.
 
 Linting is one of those techniques that can help you make fewer mistakes while coding JavaScript. You can spot issues before they become actual problems. Modern editors and IDEs offer strong support for popular tools allowing you to detect possible issues as you are developing.
 

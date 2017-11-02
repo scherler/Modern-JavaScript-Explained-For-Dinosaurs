@@ -8,7 +8,8 @@ module.exports = {
       overlay: {
         errors: true,
         warnings: true,
-      }
+      },
+      historyApiFallback: true
     },
     entry: {
         "vendor": [
@@ -32,7 +33,7 @@ module.exports = {
                 use: 'eslint-loader',
             },
             {
-                test: /\.js$/,
+                test: /\.js$|\.jsx$/,
                 exclude: /node_modules/,
                 use: 'babel-loader'
             },
@@ -70,5 +71,8 @@ module.exports = {
             minChunks: Infinity,
             async: true
         })
-    ]
+    ],
+    resolve: {
+      extensions: ['.js', '.jsx']
+    }
 };

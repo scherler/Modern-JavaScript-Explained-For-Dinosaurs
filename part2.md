@@ -473,4 +473,410 @@ file can be loaded once initially, and stored in cache for later use.
 This results in pagespeed optimizations as the browser can quickly serve the shared 
 code from cache, rather than being forced to load a larger bundle whenever a new page is visited.
 
+
+## React App ([react](https://facebook.github.io/react/))
+
+**Branch: [react_app](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/011_react_app)**
+
+**[Diff](./diffs/010_react..011_react_app)** `git diff 010_react..011_react_app`
+
 Now that we have a nice performing integration of react let us create our first react app.
+
+### Our first component
+
+We recommend the official [react tutorial](https://reactjs.org/tutorial/tutorial.html) to get a full overview of what you can do.
+
+Our first component is to extract `<div>Hello React!</div>` from
+
+```javascript
+ReactDOM.render(<div>Hello React!</div>, root);
+```
+
+We will create src/js/components/Hello.jsx with the follownig content:
+
+```javascript
+import React, { Component } from 'react';
+
+export class Hello extends Component {
+    render() {
+        return (<div>Hello React!</div>);
+    }
+}
+```
+
+and our `common.js` will become
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Hello } from './components/Hello';
+import '../less/index.less'; // tell webpack to request the transpiling of less to css
+
+const root = document.getElementById('react');
+ReactDOM.render(<Hello />, root);
+```
+
+However when you try bundle our app you will get an error like:
+
+```bash
+ERROR in ./src/js/common.js
+Module not found: Error: Can't resolve './components/Hello' in '/opt/src/mysterion/Modern-JavaScript-Explained-For-Dinosaurs/src/js'
+ @ ./src/js/common.js 11:13-42
+Child extract-text-webpack-plugin node_modules/extract-text-webpack-plugin/dist node_modules/css-loader/index.js!node_modules/less-loader/dist/cjs.js!src/less/index.less:
+       [0] ./node_modules/css-loader!./node_modules/less-loader/dist/cjs.js!./src/less/index.less 213 bytes {0} [built]
+        + 1 hidden module
+```
+
+That is because bt default `webpack` resolves only files that ends with `.js`. We need to add the following element to our `webpack.config.js`
+```
+resolve: {
+  extensions: ['.js', '.jsx']
+}
+```
+
+and change our test for the js extension to: `test: /\.js$|\.jsx$/,` in our rules.
+
+Our `Hello` component can be as well written very differently but outputting the exact same thing:
+
+```javascript
+export const Hello2 = () => (<div>Hello React!</div>);
+```
+
+This is called a `stateless functional component` and is useful for dumb/presentational components. Presentational components focus on the UI rather than behavior, so it’s important to avoid using state in presentational components.
+
+#### props
+
+Any given react component accepts parameters which are called [`props`](https://reactjs.org/docs/components-and-props.html):
+
+```javascript
+import React, { Component } from 'react';
+
+export class Hello extends Component {
+    render() {
+        const { from } = this.props;
+        return (<div>Hello React!</div>);
+    }
+}
+
+export const Hello2 = ({from}) => (<div>Hello React from {from}!</div>);
+```
+
+In our common.js we do now `<Hello from="common.js"/>` and see something like `Hello React from common.js!`.
+
+#### PropTypes
+
+As your app grows, you can catch a lot of bugs with typechecking. For some applications, you can use JavaScript extensions like Flow or TypeScript to typecheck your whole application. But even if you don’t use those, React has some built-in typechecking abilities. To run typechecking on the props for a component, you can assign the special [propTypes](https://reactjs.org/docs/typechecking-with-proptypes.html#proptypes) property.
+
+React.PropTypes has moved into a different package since React v15.5. We need to use the prop-types library instead `npm i -D -E prop-types`
+
+```javascript
+Hello.propTypes = {
+    from: PropTypes.string,
+};
+
+Hello2.propTypes = Hello.propTypes;
+```
+
+Now if we e.g. pass a number from common.js `<Hello from={1} />` we will see in the console:
+
+```
+Warning: Failed prop type: Invalid prop `from` of type `number` supplied to `Hello2`, expected `string`.
+    in Hello2
+```
+
+#### defaultProps
+
+defaultProps can be defined as a property on the component class itself, to set the default props for the class. This is used for undefined props, but not for null props.
+
+```javascript
+Hello.defaultProps = {
+    from: 'Hello.jsx'
+};
+```
+
+Then using `<Hello/>` will return `Hello React from Hello.jsx!`
+
+In case you are using es6 you can do the same without having to use `defaultProps`, so `<Hello2 />` will return
+`Hello React from Hello2!`
+
+**HEADSUP** if you pass `null` as value for `from` you will see in both cases `Hello React from !`
+
+#### props.children
+
+props.children is available on every component. It contains the content between the opening and closing tags of a component. For example:
+
+```javascript
+ReactDOM.render(<Hello2>I am a child</Hello2>, root);
+```
+
+and 
+
+```javascript
+export const Hello2 = ({from = 'Hello2', children}) => (<div>
+    Hello React from {from}!
+    { children && <p>{children}</p>}
+</div>);
+
+```
+
+will render
+
+```html
+<div>Hello React from Hello2!<p>I am a child</p></div>
+```
+
+The expression `{ children && <p>{children}</p>}` means if children are not null return the `<p/>` expression.
+
+Until now we could only use one component in our common.js this is not practical on the long run. Here `composing components` are coming in handy.
+
+#### composing components
+
+Components can refer to other components in their output. This lets us use the same component abstraction for any level of detail. A button, a form, a dialog, a screen: in React apps, all those are commonly expressed as components.
+
+Let us create an `App` component (we using a new feature of v.16: you can now return an array of elements from a component’s render method.):
+
+```javascript
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Hello, Hello2 } from './Hello';
+
+export class App extends Component {
+    // No need to wrap list items in an extra element!
+    render() {
+        // Don't forget the keys :)
+        return [ <Hello key="1"/>, <Hello2 key="2"/>]
+    }
+}
+
+App.propTypes = {
+    children: PropTypes.node,
+};
+```
+
+#### refactor index.html use a Layout component
+
+Let us refactor our index.hmtl to be a simple skeleton and not returning any content on its own:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>JavaScript Example</title>
+        <!-- link the generated css -->
+        <link href="dist/common.css" rel="stylesheet" title="Default Style"/>
+    </head>
+    <body>
+        <div id="react"></div>
+        <!-- generated the css we want to use AND mount React -->
+        <script src="dist/vendor.js"></script>
+        <script src="dist/common.js"></script>
+        <script src="dist/index.js"></script>
+    </body>
+</html>
+```
+
+Layout.jsx:
+
+```javascript
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
+export class Layout extends Component {
+    render() {
+        return (<div className="container">
+        <div className="content">
+            {this.props.children}
+        </div>
+      </div>);
+    }
+}
+
+Layout.propTypes = {
+    children: PropTypes.node,
+};
+```
+
+common.js
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { App } from './components/App';
+import { Layout } from './components/Layout';
+import '../less/index.less'; // tell webpack to request the transpiling of less to css
+
+const root = document.getElementById('react');
+ReactDOM.render(<Layout><App/></Layout>, root);
+```
+
+You may have noticed that we lost our console component. 
+We had patched the global console.log which is not such a good idea. 
+Let us create a Log component for React.
+
+#### [State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
+
+There are two types of data that control a component: props and state. props are set by the parent and they are fixed throughout the lifetime of a component. For data that is going to change, we have to use state.
+
+In general, you should initialize state in the constructor, and then call setState when you want to change it.
+
+Let us implement in our `Layout` component the manipulation of state:
+
+```javascript
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+
+/**
+ *  Beware: React setState is asynchronous!
+ *  Calling setState multiple times during a single update cycle can lead to nasty bugs, because
+ *  setState is asynchronous, subsequent calls in the same update cycle will overwrite previous
+ *  updates, and the previous changes will be lost.
+ *
+ *  This wrapper uses the alternative setState calling convention
+ *  @see https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
+ * @param message the message you want to add to the log console
+ */
+const addMessage = (message) => (previousState) => {
+    // the the logs from the earlier state
+    const returnState = [...previousState.logs];
+    // add our message
+    returnState.push(message);
+    // now return our current state
+    return {logs: returnState};
+};
+
+
+export class Layout extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {logs: []};
+    }
+    componentDidMount() {
+        const addLog = message => this.setState(addMessage(message));
+        addLog('3 rendering Layout finished');
+    }
+    render() {
+        const { logs } = this.state;
+        const addLog = message => this.setState(addMessage(message));
+        return (<div className="container">
+            <div className="content">
+                {React.cloneElement(this.props.children, { addLog })}
+            </div>
+            {logs && logs.length > 0 && <div id="log">
+                <div>Logs:</div>
+                { logs.map((item,index) => <p key={index}>{item}</p>) }
+            </div>}
+        </div>);
+    }
+}
+
+Layout.propTypes = {
+    children: PropTypes.node,
+};
+
+```
+
+Note how we pass props to the base `constructor`:
+```javascript
+    constructor(props) {
+        super(props);
+        this.state = {logs: []};
+    }
+```
+
+Class components should always call the base constructor with props.
+
+We created a wrapper function around setState to make sure that we do not
+lose any state changes. 
+
+```javascript
+const addLog = message => this.setState(addMessage(message));
+```
+
+This function we are "passing down" to our children by using `React.cloneElement` which allows to augment the properties.
+
+```javascript
+{React.cloneElement(this.props.children, { addLog })}
+```
+
+We then added the `componentDidMount` lifecycle to our `Layout` and as well to the `Hello` component.
+That is because if you would try to change the state in a `render` you will get following error in the console:
+
+```
+Warning: Cannot update during an existing state transition (such as within `render` or another component's constructor). 
+Render methods should be a pure function of props and state; constructor side-effects are an anti-pattern,
+but can be moved to `componentWillMount`
+```
+
+The former looks like:
+```javascript
+    componentDidMount() {
+        const addLog = message => this.setState(addMessage(message));
+        addLog('3 rendering Layout finished');
+    }
+```
+
+and the later looks like:
+
+```javascript
+    componentDidMount() {
+        const { addLog } = this.props;
+        addLog('1 rendering Hello finished');
+        addLog('2 rendering Hello finished');
+    }
+```
+
+The main difference is that we use `this.props.addLog` in our child component.
+
+The result will look like:
+
+```html
+<div id="log">
+    <div>Logs:</div>
+    <p>1 rendering Hello finished</p>
+    <p>2 rendering Hello finished</p>
+    <p>3 rendering Layout finished</p>
+</div>
+```
+
+You can see that first our `Hello` component finished the mount and in the end our `Layout`
+
+#### Show logs onClick
+
+We may not want to see all the time the log component so let us create a button which will show the log console onClick.
+
+```javascript
+{
+    constructor(props) {
+        super(props);
+        this.state = {
+            logs: [],
+            showLog: false, // initially do not show console
+        };
+    }
+    
+    render() {
+        const { logs, showLog } = this.state;
+        const addLog = message => this.setState(addMessage(message));
+        return (<div className="container">
+            ...
+            { !showLog && <button onClick={()=>this.setState({ showLog: true })}>Show Log</button>}
+            { showLog && <div id="log">
+                <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
+                { logs.map((item,index) => <p key={index}>{item}</p>) }
+            </div>}
+            ...
+        </div>);
+    }
+}
+
+```
+
+This examples shows that state updates are merged, since changing `this.setState({ showLog: true })`
+is not changing `this.state.logs`.
+
+#### Creating routes
+
+As soon as you have different pages that you want to expose with your app you need to define routes to tell react when to render 
+the different views. We will use [React Router](https://github.com/ReactTraining/react-router)
+

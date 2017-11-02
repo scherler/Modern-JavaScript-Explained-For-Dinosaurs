@@ -492,7 +492,7 @@ Our first component is to extract `<div>Hello React!</div>` from
 ReactDOM.render(<div>Hello React!</div>, root);
 ```
 
-We will create src/js/components/Hello.jsx with the follownig content:
+We will create src/js/components/Hello.jsx with the following content:
 
 ```javascript
 import React, { Component } from 'react';
@@ -527,7 +527,7 @@ Child extract-text-webpack-plugin node_modules/extract-text-webpack-plugin/dist 
         + 1 hidden module
 ```
 
-That is because bt default `webpack` resolves only files that ends with `.js`. We need to add the following element to our `webpack.config.js`
+That is because by default `webpack` resolves only files that ends with `.js`. We need to add the following element to our `webpack.config.js`
 ```
 resolve: {
   extensions: ['.js', '.jsx']
@@ -561,7 +561,9 @@ export class Hello extends Component {
 export const Hello2 = ({from}) => (<div>Hello React from {from}!</div>);
 ```
 
-In our common.js we do now `<Hello from="common.js"/>` and see something like `Hello React from common.js!`.
+In our common.js we do now `<Hello from="common.js"/>` and see something like `Hello React from common.js!` in the resulting html.
+
+As side note `({from})` in the `Hello2` component is the same as `(props)` and then doing `const {from} = props` 
 
 #### PropTypes
 
@@ -597,7 +599,11 @@ Hello.defaultProps = {
 Then using `<Hello/>` will return `Hello React from Hello.jsx!`
 
 In case you are using es6 you can do the same without having to use `defaultProps`, so `<Hello2 />` will return
-`Hello React from Hello2!`
+`Hello React from Hello2!` when lokking like:
+
+```javascript
+export const Hello2 = ({from = 'Hello2'}) => (<div>Hello React from {from}!</div>);
+```
 
 **HEADSUP** if you pass `null` as value for `from` you will see in both cases `Hello React from !`
 
@@ -799,7 +805,7 @@ This function we are "passing down" to our children by using `React.cloneElement
 {React.cloneElement(this.props.children, { addLog })}
 ```
 
-We then added the `componentDidMount` lifecycle to our `Layout` and as well to the `Hello` component.
+We then add the `componentDidMount` lifecycle to our `Layout` and as well to the `Hello` component.
 That is because if you would try to change the state in a `render` you will get following error in the console:
 
 ```
@@ -878,5 +884,8 @@ is not changing `this.state.logs`.
 #### Creating routes
 
 As soon as you have different pages that you want to expose with your app you need to define routes to tell react when to render 
-the different views. We will use [React Router](https://github.com/ReactTraining/react-router)
+the different views. We will use [React Router](https://github.com/ReactTraining/react-router) in the v4 which is not really
+compatible with earlier versions of that library.
+
+
 

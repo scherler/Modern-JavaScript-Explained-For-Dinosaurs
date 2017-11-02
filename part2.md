@@ -359,7 +359,6 @@ in our components, the steps to do so are the following:
 - tell `babel` about the special syntax that react brings to the plate. In our `.babelrc` we need to add a new preset 
 ```json
 {
-  "presets": ["env"]
   "presets": ["env", "react"]
 }
 ```
@@ -413,14 +412,15 @@ ReactDOM.render(<div>Hello React!</div>, root);
 <div id="react"></div>
 ```
 
-### Enhance bundle size
+### Enhance bundle size and loading times
 
 Our current bundle size has grown quite a bit, even if we have really not much javascript developed. 
 So common.js is around 115kB and index.js has grown to 252kB. That does not sound much at the moment but 
 as more dependencies we are using the bigger the bundles for each page are growing.
 
 The solution is to tell webpack that we will use some common libaries like react and moment as external files
-so webpack will not bundle them into our different files.
+so webpack will not bundle them into our different files. That has as well the benefit that this `vendor` bundle can be 
+cached by the browser which makes loading each next page **much** faster in comparision on what we had before.
 
 First install the following npm package
 ```npm

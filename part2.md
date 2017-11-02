@@ -329,11 +329,13 @@ We simply declare a new npm script as follows.
 "test:watch": "jest --watch",
 ```
 
-## Using react components ([react](https://facebook.github.io/react/))
+## Integrate react ([react](https://facebook.github.io/react/))
 
 **Branch: [react](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/010_react)**
 
 **[Diff](./diffs/009_tests..010_react)** `git diff 009_tests..010_react`
+
+### What is React?
 
 There exist different definition of what react is. React is often described as “the V in the MVC structure”. 
 This also happens to be the least tangible explanation one could give a newcomer, as (V)iews are typically
@@ -471,3 +473,4 @@ file can be loaded once initially, and stored in cache for later use.
 This results in pagespeed optimizations as the browser can quickly serve the shared 
 code from cache, rather than being forced to load a larger bundle whenever a new page is visited.
 
+Now that we have a nice performing integration of react let us create our first react app.

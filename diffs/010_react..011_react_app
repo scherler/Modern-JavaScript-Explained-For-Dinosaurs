@@ -1,0 +1,1844 @@
+diff --git a/.babelrc b/.babelrc
+index 4ffef06..5e833aa 100644
+--- a/.babelrc
++++ b/.babelrc
+@@ -1,3 +1,3 @@
+ {
+-  "presets": ["env", "react"]
++  "presets": ["env", "react", "stage-2"]
+ }
+diff --git a/index.html b/index.html
+index 5eab624..43bf50b 100644
+--- a/index.html
++++ b/index.html
+@@ -4,29 +4,13 @@
+         <meta charset="UTF-8">
+         <title>JavaScript Example</title>
+         <!-- link the generated css -->
+-        <link href="dist/common.css" rel="stylesheet" title="Default Style"/>
++        <link href="/dist/common.css" rel="stylesheet" title="Default Style"/>
+     </head>
+     <body>
+-        <h1>Hello from HTML!</h1>
+-        <div>Console.log here:</div>
+-        <div id="log"></div>
+         <div id="react"></div>
+-        <script>
+-            // https://stackoverflow.com/questions/20256760/javascript-console-log-to-html
+-            (function () {
+-                const logger = document.getElementById('log');
+-                console.log = function (message) {
+-                    if (typeof message == 'object') {
+-                        logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+-                    } else {
+-                        logger.innerHTML += message + '<br />';
+-                    }
+-                }
+-            })();
+-        </script>
+         <!-- generated the css we want to use AND mount React -->
+-        <script src="dist/vendor.js"></script>
+-        <script src="dist/common.js"></script>
+-        <script src="dist/index.js"></script>
++        <script src="/dist/vendor.js"></script>
++        <script src="/dist/common.js"></script>
++        <script src="/dist/index.js"></script>
+     </body>
+ </html>
+diff --git a/package.json b/package.json
+index 8d6eef2..42dddc2 100644
+--- a/package.json
++++ b/package.json
+@@ -4,9 +4,9 @@
+   "description": "based on the article of https://medium.com/@peterxjang/modern-javascript-explained-for-dinosaurs-f695e9747b70",
+   "main": "index.js",
+   "scripts": {
+-    "bundle": "npm run lint && npm test && npm run build",
++    "build": "npm run lint && npm test && npm run bundle",
++    "bundle": "webpack --progress -p",
+     "bundle:watch": "webpack --progress --watch",
+-    "build": "webpack --progress -p",
+     "lint": "eslint src/js",
+     "test": "jest",
+     "test:watch": "jest --watch",
+@@ -31,7 +31,8 @@
+   "dependencies": {
+     "moment": "2.19.1",
+     "react": "16.0.0",
+-    "react-dom": "16.0.0"
++    "react-dom": "16.0.0",
++    "react-router-dom": "4.2.2"
+   },
+   "devDependencies": {
+     "@babel/core": "^7.0.0-beta.4",
+@@ -39,6 +40,7 @@
+     "babel-loader": "7.1.2",
+     "babel-preset-env": "1.6.1",
+     "babel-preset-react": "6.24.1",
++    "babel-preset-stage-2": "6.24.1",
+     "css-loader": "0.28.7",
+     "eslint": "4.10.0",
+     "eslint-loader": "1.9.0",
+@@ -49,7 +51,9 @@
+     "jest-junit": "3.1.0",
+     "less": "2.7.3",
+     "less-loader": "4.0.5",
++    "prop-types": "15.6.0",
+     "style-loader": "0.19.0",
++    "svg-url-loader": "2.3.0",
+     "webpack": "3.8.1",
+     "webpack-dev-server": "2.9.3"
+   },
+diff --git a/part2.md b/part2.md
+index 1cb203a..1c121e0 100644
+--- a/part2.md
++++ b/part2.md
+@@ -473,4 +473,797 @@ file can be loaded once initially, and stored in cache for later use.
+ This results in pagespeed optimizations as the browser can quickly serve the shared 
+ code from cache, rather than being forced to load a larger bundle whenever a new page is visited.
+ 
+-Now that we have a nice performing integration of react let us create our first react app.
+\ No newline at end of file
++
++## React App ([react](https://facebook.github.io/react/))
++
++**Branch: [react_app](https://github.com/scherler/Modern-JavaScript-Explained-For-Dinosaurs/tree/011_react_app)**
++
++**[Diff](./diffs/010_react..011_react_app)** `git diff 010_react..011_react_app`
++
++Now that we have a nice performing integration of react let us create our first react app.
++
++### Our first component
++
++We recommend the official [react tutorial](https://reactjs.org/tutorial/tutorial.html) to get a full overview of what you can do.
++
++Our first component is to extract `<div>Hello React!</div>` from
++
++```javascript
++ReactDOM.render(<div>Hello React!</div>, root);
++```
++
++We will create src/js/components/Hello.jsx with the following content:
++
++```javascript
++import React, { Component } from 'react';
++
++export class Hello extends Component {
++    render() {
++        return (<div>Hello React!</div>);
++    }
++}
++```
++
++and our `common.js` will become
++
++```javascript
++import React from 'react';
++import ReactDOM from 'react-dom';
++import { Hello } from './components/Hello';
++import '../less/index.less'; // tell webpack to request the transpiling of less to css
++
++const root = document.getElementById('react');
++ReactDOM.render(<Hello />, root);
++```
++
++However when you try bundle our app you will get an error like:
++
++```bash
++ERROR in ./src/js/common.js
++Module not found: Error: Can't resolve './components/Hello' in '/opt/src/mysterion/Modern-JavaScript-Explained-For-Dinosaurs/src/js'
++ @ ./src/js/common.js 11:13-42
++Child extract-text-webpack-plugin node_modules/extract-text-webpack-plugin/dist node_modules/css-loader/index.js!node_modules/less-loader/dist/cjs.js!src/less/index.less:
++       [0] ./node_modules/css-loader!./node_modules/less-loader/dist/cjs.js!./src/less/index.less 213 bytes {0} [built]
++        + 1 hidden module
++```
++
++That is because by default `webpack` resolves only files that ends with `.js`. We need to add the following element to our `webpack.config.js`
++```
++resolve: {
++  extensions: ['.js', '.jsx']
++}
++```
++
++and change our test for the js extension to: `test: /\.js$|\.jsx$/,` in our rules.
++
++Our `Hello` component can be as well written very differently but outputting the exact same thing:
++
++```javascript
++export const Hello2 = () => (<div>Hello React!</div>);
++```
++
++This is called a `stateless functional component` and is useful for dumb/presentational components. Presentational components focus on the UI rather than behavior, so it’s important to avoid using state in presentational components.
++
++#### props
++
++Any given react component accepts parameters which are called [`props`](https://reactjs.org/docs/components-and-props.html):
++
++```javascript
++import React, { Component } from 'react';
++
++export class Hello extends Component {
++    render() {
++        const { from } = this.props;
++        return (<div>Hello React!</div>);
++    }
++}
++
++export const Hello2 = ({from}) => (<div>Hello React from {from}!</div>);
++```
++
++In our common.js we do now `<Hello from="common.js"/>` and see something like `Hello React from common.js!` in the resulting html.
++
++As side note `({from})` in the `Hello2` component is the same as `(props)` and then doing `const {from} = props` 
++
++#### PropTypes
++
++As your app grows, you can catch a lot of bugs with typechecking. For some applications, you can use JavaScript extensions like Flow or TypeScript to typecheck your whole application. But even if you don’t use those, React has some built-in typechecking abilities. To run typechecking on the props for a component, you can assign the special [propTypes](https://reactjs.org/docs/typechecking-with-proptypes.html#proptypes) property.
++
++React.PropTypes has moved into a different package since React v15.5. We need to use the prop-types library instead `npm i -D -E prop-types`
++
++```javascript
++Hello.propTypes = {
++    from: PropTypes.string,
++};
++
++Hello2.propTypes = Hello.propTypes;
++```
++
++Now if we e.g. pass a number from common.js `<Hello from={1} />` we will see in the console:
++
++```
++Warning: Failed prop type: Invalid prop `from` of type `number` supplied to `Hello2`, expected `string`.
++    in Hello2
++```
++
++#### defaultProps
++
++defaultProps can be defined as a property on the component class itself, to set the default props for the class. This is used for undefined props, but not for null props.
++
++```javascript
++Hello.defaultProps = {
++    from: 'Hello.jsx'
++};
++```
++
++Then using `<Hello/>` will return `Hello React from Hello.jsx!`
++
++In case you are using es6 you can do the same without having to use `defaultProps`, so `<Hello2 />` will return
++`Hello React from Hello2!` when lokking like:
++
++```javascript
++export const Hello2 = ({from = 'Hello2'}) => (<div>Hello React from {from}!</div>);
++```
++
++**HEADSUP** if you pass `null` as value for `from` you will see in both cases `Hello React from !`
++
++#### props.children
++
++props.children is available on every component. It contains the content between the opening and closing tags of a component. For example:
++
++```javascript
++ReactDOM.render(<Hello2>I am a child</Hello2>, root);
++```
++
++and 
++
++```javascript
++export const Hello2 = ({from = 'Hello2', children}) => (<div>
++    Hello React from {from}!
++    { children && <p>{children}</p>}
++</div>);
++
++```
++
++will render
++
++```html
++<div>Hello React from Hello2!<p>I am a child</p></div>
++```
++
++The expression `{ children && <p>{children}</p>}` means if children are not null return the `<p/>` expression.
++
++Until now we could only use one component in our common.js this is not practical on the long run. Here `composing components` are coming in handy.
++
++#### composing components
++
++Components can refer to other components in their output. This lets us use the same component abstraction for any level of detail. A button, a form, a dialog, a screen: in React apps, all those are commonly expressed as components.
++
++Let us create an `App` component (we using a new feature of v.16: you can now return an array of elements from a component’s render method.):
++
++```javascript
++import React, { Component } from 'react';
++import PropTypes from 'prop-types';
++import { Hello, Hello2 } from './Hello';
++
++export class App extends Component {
++    // No need to wrap list items in an extra element!
++    render() {
++        // Don't forget the keys :)
++        return [ <Hello key="1"/>, <Hello2 key="2"/>]
++    }
++}
++
++App.propTypes = {
++    children: PropTypes.node,
++};
++```
++
++#### refactor index.html use a Layout component
++
++Let us refactor our index.hmtl to be a simple skeleton and not returning any content on its own:
++
++```html
++<!DOCTYPE html>
++<html lang="en">
++    <head>
++        <meta charset="UTF-8">
++        <title>JavaScript Example</title>
++        <!-- link the generated css -->
++        <link href="dist/common.css" rel="stylesheet" title="Default Style"/>
++    </head>
++    <body>
++        <div id="react"></div>
++        <!-- generated the css we want to use AND mount React -->
++        <script src="dist/vendor.js"></script>
++        <script src="dist/common.js"></script>
++        <script src="dist/index.js"></script>
++    </body>
++</html>
++```
++
++Layout.jsx:
++
++```javascript
++import React, { Component } from 'react';
++import PropTypes from 'prop-types';
++
++export class Layout extends Component {
++    render() {
++        return (<div className="container">
++        <div className="content">
++            {this.props.children}
++        </div>
++      </div>);
++    }
++}
++
++Layout.propTypes = {
++    children: PropTypes.node,
++};
++```
++
++common.js
++
++```javascript
++import React from 'react';
++import ReactDOM from 'react-dom';
++import { App } from './components/App';
++import { Layout } from './components/Layout';
++import '../less/index.less'; // tell webpack to request the transpiling of less to css
++
++const root = document.getElementById('react');
++ReactDOM.render(<Layout><App/></Layout>, root);
++```
++
++You may have noticed that we lost our console component. 
++We had patched the global console.log which is not such a good idea. 
++Let us create a Log component for React.
++
++#### [State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
++
++There are two types of data that control a component: props and state. props are set by the parent and they are fixed throughout the lifetime of a component. For data that is going to change, we have to use state.
++
++In general, you should initialize state in the constructor, and then call setState when you want to change it.
++
++Let us implement in our `Layout` component the manipulation of state:
++
++```javascript
++import React, {Component} from 'react';
++import PropTypes from 'prop-types';
++
++/**
++ *  Beware: React setState is asynchronous!
++ *  Calling setState multiple times during a single update cycle can lead to nasty bugs, because
++ *  setState is asynchronous, subsequent calls in the same update cycle will overwrite previous
++ *  updates, and the previous changes will be lost.
++ *
++ *  This wrapper uses the alternative setState calling convention
++ *  @see https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
++ * @param message the message you want to add to the log console
++ */
++const addMessage = (message) => (previousState) => {
++    // the the logs from the earlier state
++    const returnState = [...previousState.logs];
++    // add our message
++    returnState.push(message);
++    // now return our current state
++    return {logs: returnState};
++};
++
++
++export class Layout extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {logs: []};
++    }
++    componentDidMount() {
++        const addLog = message => this.setState(addMessage(message));
++        addLog('3 rendering Layout finished');
++    }
++    render() {
++        const { logs } = this.state;
++        const addLog = message => this.setState(addMessage(message));
++        return (<div className="container">
++            <div className="content">
++                {React.cloneElement(this.props.children, { addLog })}
++            </div>
++            {logs && logs.length > 0 && <div id="log">
++                <div>Logs:</div>
++                { logs.map((item,index) => <p key={index}>{item}</p>) }
++            </div>}
++        </div>);
++    }
++}
++
++Layout.propTypes = {
++    children: PropTypes.node,
++};
++
++```
++
++Note how we pass props to the base `constructor`:
++```javascript
++    constructor(props) {
++        super(props);
++        this.state = {logs: []};
++    }
++```
++
++Class components should always call the base constructor with props.
++
++We created a wrapper function around setState to make sure that we do not
++lose any state changes. 
++
++```javascript
++const addLog = message => this.setState(addMessage(message));
++```
++
++This function we are "passing down" to our children by using `React.cloneElement` which allows to augment the properties.
++
++```javascript
++{React.cloneElement(this.props.children, { addLog })}
++```
++
++We then add the `componentDidMount` lifecycle to our `Layout` and as well to the `Hello` component.
++That is because if you would try to change the state in a `render` you will get following error in the console:
++
++```
++Warning: Cannot update during an existing state transition (such as within `render` or another component's constructor). 
++Render methods should be a pure function of props and state; constructor side-effects are an anti-pattern,
++but can be moved to `componentWillMount`
++```
++
++The former looks like:
++```javascript
++    componentDidMount() {
++        const addLog = message => this.setState(addMessage(message));
++        addLog('3 rendering Layout finished');
++    }
++```
++
++and the later looks like:
++
++```javascript
++    componentDidMount() {
++        const { addLog } = this.props;
++        addLog('1 rendering Hello finished');
++        addLog('2 rendering Hello finished');
++    }
++```
++
++The main difference is that we use `this.props.addLog` in our child component.
++
++The result will look like:
++
++```html
++<div id="log">
++    <div>Logs:</div>
++    <p>1 rendering Hello finished</p>
++    <p>2 rendering Hello finished</p>
++    <p>3 rendering Layout finished</p>
++</div>
++```
++
++You can see that first our `Hello` component finished the mount and in the end our `Layout`
++
++#### Show logs onClick
++
++We may not want to see all the time the log component so let us create a button which will show the log console onClick.
++
++```javascript
++{
++    constructor(props) {
++        super(props);
++        this.state = {
++            logs: [],
++            showLog: false, // initially do not show console
++        };
++    }
++    
++    render() {
++        const { logs, showLog } = this.state;
++        const addLog = message => this.setState(addMessage(message));
++        return (<div className="container">
++            ...
++            { !showLog && <button onClick={()=>this.setState({ showLog: true })}>Show Log</button>}
++            { showLog && <div id="log">
++                <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
++                { logs.map((item,index) => <p key={index}>{item}</p>) }
++            </div>}
++            ...
++        </div>);
++    }
++}
++
++```
++
++This examples shows that state updates are merged, since changing `this.setState({ showLog: true })`
++is not changing `this.state.logs`.
++
++#### Creating routes
++
++As soon as you have different pages that you want to expose with your app you need to define routes 
++to tell react when to render the different views. 
++We will use [React Router](https://github.com/ReactTraining/react-router) in the v4 which is not 
++really compatible with earlier versions of that library.
++
++First let us activate `stage-2` support for babel, so we can use [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
++in our sources like `const objClone = { ...obj };`
++
++Further we will install a new webpack plugin so we can load svg files and serve them.
++
++```bash
++npm i -S -E react-router-dom
++npm i -D -E babel-preset-stage-2 svg-url-loader
++```
++
++We need to tell babel and webpack that we support `stage-2` now. For this we will add it to `.babelrc` in the `presets`
++
++```json
++{
++  "presets": ["env", "react", "stage-2"]
++}
++```
++
++Since we are starting to develop a real webapp we want to be able to serve svg images. For this we
++need to add a new loader to our `webpack.config.js`. While we have opened the `webpack.config.js` 
++we need to activate [history-api-fallback](https://github.com/webpack/webpack-dev-server/tree/master/examples/history-api-fallback)
++in the `devServer` section to make sure all our routes are using our `index.hmtl`. Further we need to tell webpack to resolve
++not only `js` extensions but as well `jsx` and modify our loader regex to include it as well in the `babel-loader`.
++
++```
++...
++module.exports = {
++    devServer: {
++     ...
++      historyApiFallback: true
++    },
++...
++    module: {
++        rules: [
++            {
++                test: /\.js$|\.jsx$/,
++                exclude: /node_modules/,
++                use: 'babel-loader'
++            },
++...
++            {
++                test: /\.svg$/,
++                use: 'svg-url-loader'
++            }
++        ],
++    },
++...
++    resolve: {
++      extensions: ['.js', '.jsx']
++    }
++};
++```
++
++We are using this loader in our index.less
++
++```less
++.Logo {
++  background-image: url('svg/React-icon.svg');
++  background-repeat: no-repeat;
++  width: 75px;
++  height: 60px;
++  margin-top: 5px;
++}
++.NotFound{
++  background-image: url('svg/not-found.svg');
++  background-repeat: no-repeat;
++  background-size: 400px 175px;
++  height: 200px;
++  width: 100vh;
++  margin: auto;
++  margin-top: 25px;
++
++}
++```
++
++Until now we had just a couple of files to provide some example of what you can do and how. Let us now create
++a lot more to simulate a real world example. The following files are added
++
++```bash
++src/js/components
++├── App.jsx # main component exposing Header and Main
++├── Header.jsx # component to create logo and navigation tabs
++├── Home.jsx # our main index page showing the usage of moment lib
++├── Main.jsx # component to hold all routes and map them to components
++├── NotFound.jsx # in case the route is not defined show a 404
++├── Team.jsx # sample component to show nested routes and data drill down
++└── teams.js # sample teams used
++```
++
++##### Header.js
++
++```javascript
++import React from 'react';
++import { Link, Route } from 'react-router-dom';
++
++export const tabs = [{
++    to:'/',
++    caption:'Home',
++    exact: true,
++}, {
++    to: '/team',
++    caption: 'Teams',
++}];
++
++export const TabsRender = ({ match: { url }}) => <nav><ul> 
++    {tabs.map(tab => {
++        let active = false;
++        const { exact, to, caption} = tab;
++        if (exact) {
++            active = url === to;
++        } else {
++            active = url.indexOf(to) > -1;
++        }
++        return <li key={to} className={ active ? 'active' : ''}>
++            <Link to={to}>{caption}</Link>
++        </li>})
++    }
++</ul></nav>;
++
++TabsRender.propTypes = {
++    match: PropTypes.shape({ url: PropTypes.string })
++};
++
++export const Header = () => (<div className="links">
++    <section className="header">
++        <div className="Logo"></div>
++        <Route path='*' componet={TabsRender} />
++    </section>
++</div>);
++```
++
++We are creating here a typical header where you have a logo on the left side and on the right hand a tap-navigation.
++
++We are matching all path `<Route path='*' componet={TabsRender} />` and then leverage to the `TabsRender` component.
++Here use the `({ match: { url }})` to 
++evaluate which tab is currently active, we can use `exact` to match `url === to` or see whether our current path is based
++on the team section ` url.indexOf(to) > -1`.
++
++You may have noticed by now, that I am a big fan of newer javascript syntax. Let us see the [destruction assignment](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
++we use in the `TabRender`. 
++
++We know from the [match](https://reacttraining.com/react-router/core/api/match) documentation that we can expect
++`params, isExact, path, url` being passed to a `Route` child. We further know from the [Route](https://reacttraining.com/react-router/core/api/Route/Route-props) 
++documentation that besides `match` we can expect `location` and `history` as properties passed to our `TabsRender`
++
++```javascript
++const props = { 
++    location,
++    history, 
++    match: { 
++        url, 
++        path, 
++        params, 
++        isExact 
++    }}; // this are the props that are passed from the Route
++// since we are solely interested in the url to make our comparison we can "extract" the value and define a fallback
++// beware of match being null then the fallback will not work, you should use undefined instead of null
++const { match: { url } = { url: 'none'}} = props;
++// in old shool js you need to do the following to prevent NPE
++const oldSchoolUrl = props.match ? props.match.url : 'none';
++// the following should be true in case match had **not** being null
++url === oldSchoolUrl
++```
++
++Now have let us have a look on the `Main` compontent.
++
++```javascript
++import { Switch, Route } from 'react-router-dom';
++import  { Home } from './Home';
++import { Teams } from './Team';
++import { NotFound} from './NotFound';
++
++export const Main = () => (
++  <main>
++    <Switch>
++      <Route exact path='/' component={Home}/>
++      <Route path='/team' component={Teams}/>
++      <Route path='*' component={NotFound}/>
++    </Switch>
++  </main>
++);
++```
++
++Here we are using the `Route` component slightly different then before since we now are matching different `path`.
++The [Switch](https://reacttraining.com/react-router/core/api/Switch)
++elemet will render the first child `<Route>` or `<Redirect>` that matches the location. Our first route uses `exact` because if
++we would not use it, it will be matched on every request and hence our other matches would never be executed. 
++
++The `<Route path='*' component={NotFound}/>` as last route will make sure we will always return at least the 404 page in case we do not
++match any other path. 
++
++The `Home` component is real basic put I want to point to the default import of `App2` `import App2 from './App2';` because it shows the usages of HOC.
++
++##### HOC [higher order components](https://reactjs.org/docs/higher-order-components.html)
++
++In our first version before using the router we used the `Layout` component to pass the `addMessage` method to the children. However 
++we do not need our Layout component anymore but we need that method. The solution is to create a HOC. 
++
++> A higher-order component (HOC) is an advanced technique in React for reusing component logic. HOCs are not part of the React API, per se. They are a pattern that emerges from React’s compositional nature.
++> <cite>[higher order components](https://reactjs.org/docs/higher-order-components.html)</cite>
++
++Our HOC component looks like:
++
++```javascript
++import React, {Component} from 'react';
++
++const addMessageAction = (message) => (previousState) => {
++    // the the logs from the earlier state
++    const returnState = [...previousState.logs];
++    // add our message
++    returnState.push(message);
++    // now return our current state
++    return {logs: returnState};
++};
++
++export const addMessage = ComposedComponent => class extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            logs: [],
++            showLog: false,
++        };
++    }
++    componentDidMount() {
++        const addLog = message => this.setState(addMessageAction(message));
++        addLog('HOC component did mount');
++    }
++    render() {
++        const { logs, showLog } = this.state;
++        const addLog = message => this.setState(addMessageAction(message));
++        const messageOutput = showLog ? (<div id="log">
++            <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
++            { logs.map((item,index) => <p key={index}>{item}</p>) }
++        </div>) : (<button onClick={()=>this.setState({ showLog: true })}>Show Log</button>);
++        return (<ComposedComponent
++            addLog={addLog}
++            messageOutput={messageOutput}
++            {...this.props}
++        />);
++    }
++};
++```
++
++What we are doing here is basically augment the component that is passed to us with two new properties `addMessage` as a function
++and `messageOutput` as DOM element.
++
++We are using it in our `App2` as follows and define the `ComposedComponent` as `export default`: 
++
++```javascript
++...
++import { addMessage} from './addMessage';
++...
++export default addMessage(App2);
++// leads to:
++export const addMessage = App2 => class extends Component {
++    ...
++    return (<App2
++        addLog={addLog}
++        messageOutput={messageOutput}
++        {...this.props}
++    />);
++}
++```
++
++##### nested routes
++
++In `Team.jsx` we are using nested routes to create an overview page and the team detail page.
++In the Main component we have declared to match the Teams, so we only
++enter when the `url` starts with `/team`. The following can lead to an error
++which will stop our app from rendering.
++
++```javascript
++...
++export const Teams = () => <div className="TeamContainer">
++    <Switch>
++      <Route exact path='/team' component={ TeamsRender }/>
++      <Route path='/team/:name' component={ Members } />
++    </Switch>
++</div>;
++```
++
++In the case that the team name does not exist we will run into a NPE becasue of
++the fact that `getTeams(name)[0]` return null.
++
++```javascript
++export const Members = ({ match: { params: { name }}}) => {
++    const { displayName, image, members } = getTeams(name)[0];
++    return (<div className="team">
++        <div className="spacer">
++            <img className="animate" src={image} alt={displayName} title={displayName}/>
++        </div>
++        { members.map(item => <Member {...{...item, key: item.character}} />)}
++    </div>);
++};
++```
++
++##### [Error Boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)
++
++First of all let us use a new feature of react 16 where we can
++use [error boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)
++to prevent our app from breaking.
++
++> Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. Error boundaries catch errors during rendering, in lifecycle methods, and in constructors of the whole tree below them.
++> <cite>[error boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)</cite>
++
++We want to be able to catch the error that can happen in different places
++for our application. This calls to create another HOC, which shows us that we can 
++return an error answer instead of the component that has errors.
++
++```javascript
++import React, {Component} from 'react';
++
++export const Alert = ({error: { message}, info: {componentStack}}) => {
++    const stack = componentStack.split(/\n/)
++        .filter(content => content !== '')
++        .map(item => <li>{item}</li>);
++    return (<div className="Alert">
++        <div className="Alert-Flex">
++            <div className="border">&nbsp;</div>
++            <div className="title">
++                { message }
++            </div>
++        </div>
++        <div className="Alert-Flex">
++            <div className="border">&nbsp;</div>
++            <div className="message">
++                <ul>
++                    { stack }
++                </ul>
++            </div>
++        </div>
++    </div>);
++};
++export const addErrorBounds = ComposedComponent => class extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            hasError: false,
++            message: undefined,
++        };
++    }
++    componentDidCatch(error, info) {
++        // Display fallback UI
++        this.setState({hasError: true, message: {error, info}});
++    }
++    render() {
++        // if we have errors we return an alert and not the ComposedComponent
++        if (this.state.hasError) {
++            const { error, info } = this.state.message;
++            return <Alert {...{error, info}}/>;
++        }
++        return (<ComposedComponent {...this.props} />);
++    }
++};
++```
++
++Now we can add it to our parent `App` component as a `catch all error anywhere` 
++approach with `export default addErrorBounds(App);` and use the default import for our common.js.
++
++However that will basically make our app unusable since we do not render any child.
++
++When we use it on a component level like follows, we can prevent only the problematic component to be rendered
++but the rest of our app will work as expected.
++```javascript
++// showing how you can use HOC to reuse error boundaries
++export const BoundedMembers = addErrorBounds(Members);
++export const Teams = () => <div className="TeamContainer">
++    <Switch>
++      <Route exact path='/team' component={ TeamsRender }/>
++      <Route path='/team/:name' component={ BoundedMembers } />
++    </Switch>
++</div>;
++```
++
++In case that we want to look up a team that triggers a NPE we will now display 
++an alert instead to break our app, which still provides means to go to the registered
++views. In real life you would now go ahead and prevent that non-existing teams can be returned,  however 
++for demonstration purposes of the error boundaries we will not do that.
++
+diff --git a/src/js/common.js b/src/js/common.js
+index 10ad68e..5b98c75 100644
+--- a/src/js/common.js
++++ b/src/js/common.js
+@@ -1,6 +1,8 @@
+-import '../less/index.less'; // tell webpack to request the transpiling of less to css
+ import React from 'react';
+ import ReactDOM from 'react-dom';
++import { BrowserRouter as Router } from 'react-router-dom';
++import App from './components/App';
++import '../less/index.less'; // tell webpack to request the transpiling of less to css
+ 
+ const root = document.getElementById('react');
+-ReactDOM.render(<div>Hello React!</div>, root);
++ReactDOM.render(<Router><App/></Router>, root);
+diff --git a/src/js/components/Alert.jsx b/src/js/components/Alert.jsx
+new file mode 100644
+index 0000000..518a312
+--- /dev/null
++++ b/src/js/components/Alert.jsx
+@@ -0,0 +1,44 @@
++import React, {Component} from 'react';
++
++export const Alert = ({error: { message}, info: {componentStack}}) => {
++    const stack = componentStack.split(/\n/)
++        .filter(content => content !== '')
++        .map(item => <li>{item}</li>);
++    return (<div className="Alert">
++        <div className="Alert-Flex">
++            <div className="border">&nbsp;</div>
++            <div className="title">
++                { message }
++            </div>
++        </div>
++        <div className="Alert-Flex">
++            <div className="border">&nbsp;</div>
++            <div className="message">
++                <ul>
++                    { stack }
++                </ul>
++            </div>
++        </div>
++    </div>);
++};
++export const addErrorBounds = ComposedComponent => class extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            hasError: false,
++            message: undefined,
++        };
++    }
++    componentDidCatch(error, info) {
++        // Display fallback UI
++        this.setState({hasError: true, message: {error, info}});
++    }
++    render() {
++        // if we have errors we return an alert and not the ComposedComponent
++        if (this.state.hasError) {
++            const { error, info } = this.state.message;
++            return <Alert {...{error, info}}/>;
++        }
++        return (<ComposedComponent {...this.props} />);
++    }
++};
+\ No newline at end of file
+diff --git a/src/js/components/App.jsx b/src/js/components/App.jsx
+new file mode 100644
+index 0000000..b475fbd
+--- /dev/null
++++ b/src/js/components/App.jsx
+@@ -0,0 +1,11 @@
++import React from 'react';
++import { Header } from './Header';
++import { Main } from './Main';
++import { addErrorBounds } from './Alert';
++
++export const App = () => (<div className="container">
++    <Header/>
++    <Main/>
++</div>);
++
++export default addErrorBounds(App);
+\ No newline at end of file
+diff --git a/src/js/components/App2.jsx b/src/js/components/App2.jsx
+new file mode 100644
+index 0000000..282c53b
+--- /dev/null
++++ b/src/js/components/App2.jsx
+@@ -0,0 +1,22 @@
++import React, { Component } from 'react';
++import PropTypes from 'prop-types';
++import { Hello, Hello2 } from './Hello';
++import { addMessage} from './addMessage';
++
++export class App2 extends Component {
++    componentDidMount() {
++        const { addLog =(message) => console.log(message) } = this.props;
++        addLog('rendering APP2 finished');
++    }
++    render() {
++        const { messageOutput = (<div>Nothing</div>) } = this.props;
++        return <div>Second page <Hello {...this.props} /><Hello2 {...this.props} /> {  messageOutput}</div>;
++    }
++}
++
++App2.propTypes = {
++    addLog: PropTypes.func,
++    messageOutput: PropTypes.node,
++};
++
++export default addMessage(App2);
+\ No newline at end of file
+diff --git a/src/js/components/Header.jsx b/src/js/components/Header.jsx
+new file mode 100644
+index 0000000..bdac43a
+--- /dev/null
++++ b/src/js/components/Header.jsx
+@@ -0,0 +1,38 @@
++import React from 'react';
++import PropTypes from 'prop-types';
++import { Link, Route } from 'react-router-dom';
++
++export const tabs = [{
++    to:'/',
++    caption:'Home',
++    exact: true,
++}, {
++    to: '/team',
++    caption: 'Teams',
++}];
++
++export const TabsRender = ({ match: { url } = { url: 'none'}}) => <nav><ul>
++    {tabs.map(tab => {
++        let active = false;
++        const { exact, to, caption} = tab;
++        if (exact) {
++            active = url === to;
++        } else {
++            active = url.indexOf(to) > -1;
++        }
++        return <li key={to} className={ active ? 'active' : ''}>
++            <Link to={to}>{caption}</Link>
++        </li>})
++    }
++</ul></nav>;
++
++TabsRender.propTypes = {
++    match: PropTypes.shape({ url: PropTypes.string })
++};
++
++export const Header = () => (<div className="links">
++    <section className="header">
++        <div className="Logo"></div>
++        <Route path='*' component={TabsRender} />
++    </section>
++</div>);
+\ No newline at end of file
+diff --git a/src/js/components/Hello.jsx b/src/js/components/Hello.jsx
+new file mode 100644
+index 0000000..5d9844b
+--- /dev/null
++++ b/src/js/components/Hello.jsx
+@@ -0,0 +1,31 @@
++import React, { Component } from 'react';
++import PropTypes from 'prop-types';
++
++export class Hello extends Component {
++    componentDidMount() {
++        const { addLog =(message) => console.log(message) } = this.props;
++        addLog('1 rendering Hello finished');
++        addLog('2 rendering Hello finished');
++    }
++    render() {
++        const { from } = this.props;
++        return (<div>Hello React from {from}!</div>);
++    }
++}
++
++export const Hello2 = ({from = 'Hello2', children}) => (<div>
++    Hello React from {from}!
++    { children && <p>{children}</p>}
++</div>);
++
++Hello.propTypes = {
++    from: PropTypes.string,
++    children: PropTypes.node,
++    addLog: PropTypes.func,
++};
++
++Hello.defaultProps = {
++    from: 'Hello.jsx'
++};
++
++Hello2.propTypes = Hello.propTypes;
+diff --git a/src/js/components/Home.jsx b/src/js/components/Home.jsx
+new file mode 100644
+index 0000000..d42666e
+--- /dev/null
++++ b/src/js/components/Home.jsx
+@@ -0,0 +1,19 @@
++import React from 'react';
++import moment from 'moment';
++import App2 from './App2';
++
++export const Home = () => (<div>
++    <h2>Home</h2>
++    <div className="teams">
++        <span>Time is: </span>
++        <span>{ moment().format('dddd, MMMM Do YYYY, h:mm:ss a') }</span>
++    </div>
++    <div className="teams">
++        <span>Is Daylight Saving Time: </span>
++        <span>{ moment().isDST() ? 'yes' : 'no' }</span>
++    </div>
++    <div>
++        <h2>Former example</h2>
++        <div><App2/></div>
++    </div>
++</div>);
+\ No newline at end of file
+diff --git a/src/js/components/Layout.jsx b/src/js/components/Layout.jsx
+new file mode 100644
+index 0000000..310d4ea
+--- /dev/null
++++ b/src/js/components/Layout.jsx
+@@ -0,0 +1,65 @@
++import React, {Component} from 'react';
++import PropTypes from 'prop-types';
++import { Link } from 'react-router-dom'
++
++/**
++ *  Beware: React setState is asynchronous!
++ *  Calling setState multiple times during a single update cycle can lead to nasty bugs, because
++ *  setState is asynchronous, subsequent calls in the same update cycle will overwrite previous
++ *  updates, and the previous changes will be lost.
++ *
++ *  This wrapper uses the alternative setState calling convention
++ *  @see https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
++ * @param message the message you want to add to the log console
++ */
++const addMessage = (message) => (previousState) => {
++    // the the logs from the earlier state
++    const returnState = [...previousState.logs];
++    // add our message
++    returnState.push(message);
++    // now return our current state
++    return {logs: returnState};
++};
++
++
++export class Layout extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            logs: [],
++            showLog: false,
++        };
++    }
++    componentDidMount() {
++        const addLog = message => this.setState(addMessage(message));
++        addLog('3 rendering Layout finished');
++    }
++    render() {
++        const { logs, showLog } = this.state;
++        const addLog = message => this.setState(addMessage(message));
++        return (<div className="container">
++            <div className="links">
++                <section>
++                    <nav>
++                        <ul>
++                          <li><Link to="/">Home</Link></li>
++                          <li><Link to="/x">App2</Link></li>
++                        </ul>
++                    </nav>
++                </section>
++            </div>
++            <div className="content">
++                {React.cloneElement(this.props.children, { addLog })}
++            </div>
++            { !showLog && <button onClick={()=>this.setState({ showLog: true })}>Show Log</button>}
++            { showLog && <div id="log">
++                <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
++                { logs.map((item,index) => <p key={index}>{item}</p>) }
++            </div>}
++        </div>);
++    }
++}
++
++Layout.propTypes = {
++    children: PropTypes.node,
++};
+diff --git a/src/js/components/Log.jsx b/src/js/components/Log.jsx
+new file mode 100644
+index 0000000..00a6eba
+--- /dev/null
++++ b/src/js/components/Log.jsx
+@@ -0,0 +1,43 @@
++import React, {Component} from 'react';
++
++/**
++ *  Beware: React setState is asynchronous!
++ *  Calling setState multiple times during a single update cycle can lead to nasty bugs, because
++ *  setState is asynchronous, subsequent calls in the same update cycle will overwrite previous
++ *  updates, and the previous changes will be lost.
++ *
++ *  This wrapper uses the alternative setState calling convention
++ *  @see https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
++ * @param message the message you want to add to the log console
++ */
++const addMessage = (message) => (previousState) => {
++    // the the logs from the earlier state
++    const returnState = [...previousState.logs];
++    // add our message
++    returnState.push(message);
++    // now return our current state
++    return {logs: returnState};
++};
++
++export const Log = ComposedComponent => class extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            logs: [],
++            showLog: false,
++        };
++    }
++    render() {
++        const { logs, showLog } = this.state;
++        const addLog = message => this.setState(addMessage(message));
++        const logDom = showLog ? <button onClick={()=>this.setState({ showLog: true })}>Show Log</button> : (<div id="log">
++            <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
++            { logs.map((item,index) => <p key={index}>{item}</p>) }
++        </div>);
++        return (<ComposedComponent {...{
++                addLog,
++                logDom,
++                ...this.props,
++            }} />);
++    }
++};
+diff --git a/src/js/components/Logo.jsx b/src/js/components/Logo.jsx
+new file mode 100644
+index 0000000..6e31451
+--- /dev/null
++++ b/src/js/components/Logo.jsx
+@@ -0,0 +1,16 @@
++export const Logo = () => (
++    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 192.756 192.756">
++        <path fillRule="evenodd" clipRule="evenodd" fill="#fff" d="M0 0h192.756v192.756H0V0z"/>
++        <path fillRule="evenodd" clipRule="evenodd"
++              d="M108.244 189.201l3.729-4.469-10.998-54.451 46.533 2.86 27.267 2.509 1.76-5.259L164.562 4.92l-4.359-1.696-68.951 115.723 16.992 70.254z"/>
++        <path fillRule="evenodd" clipRule="evenodd" fill="#a27b66" stroke="#000" strokeWidth=".228"
++              strokeMiterlimit="2.613"
++              d="M16.221 29.7L161.16 2.834l13.615 132.816-75.877-2.863 9.674 56.463-7.068.672-11.046-57.75-65.709-3.637L16.221 29.7z"/>
++        <path d="M168.008 69.13L20.698 80.509m150.06 15.645l-148.484 6.127m150.986 18.442l-149.3-3.592" fill="none"
++              stroke="#000" strokeWidth=".228" strokeMiterlimit="2.613"/>
++        <path
++            d="M147.055 23.04c.533 2.776.627 5.7.898 8.574-1.141.348-2.523.126-3.473.911.494 1.58-.145 3.73.83 5.073l-.178.006c-.055 2.396.336 4.911.547 7.343.861.593 1.846.916 2.746 1.33-.361 1.12-1.689 1.208-2.461 2.031-.08 1.599.273 2.962.453 4.42.07.751-.068 1.953.268 2.741-.172 1.558.457 3.178.291 4.913 1.26.58 2.553-.571 3.686.191.172 2.611.668 5.61.578 8.318-3.152 1.167-6.535-2.005-9.375.614-.965.297-2.121.202-3.184.236l-.756-8.269c.92-.384 2.127-.024 3.002-.407.182-3.952-.697-7.827-1-11.764l-.174.139-.137-.128-7.639.869-.295.497c.209 2.343.461 4.642.713 6.984l-.17.183c.172 1.236.518 2.333.428 3.667.998.722 2.033-.199 3.193.029.512 2.156.586 4.46.879 6.667-.076.402.035 1.064.053 1.595-2.887 1.202-6.025-1.269-8.756.638l-3.354.419c-.225-2.831-.631-5.745-.584-8.451.795-.07 2.084.065 3.004-.275-.301-3.848-.43-7.835-.994-11.586-.984-.279-1.721-1.097-2.742-1.197l2.461-1.987c-.572-4.016-.447-8.367-1.326-12.285-.086.092-.172.228-.35.188-.758-.108-1.896.283-2.701.087-.229-2.963-.617-5.39-.578-8.273 1.76-.412 4.027-.175 5.898.12 1.832-.902 3.711-1.761 5.832-1.963.531 2.732.619 5.435.938 8.439-.906.783-2.529-.096-3.34.906.377.697.012 1.685.389 2.382.064.663-.031 1.819.26 2.564a36.757 36.757 0 0 0 .723 7.293c2.791-.046 5.291-.836 8.082-.883.225-3.998-.787-7.868-.83-11.946-.467-2.114-4.57 1.167-3.607-1.968-.209-2.343-.469-4.863-.67-6.985 1.98-.463 3.975-.395 5.893-.058 2.064-.554 3.982-1.548 6.143-1.928l.486-.014zM115.922 27.862c.98 4.27.59 8.628 1.57 12.898l.133-.005c-.082.225-.117.491-.291.63.201.747.248 2.209.275 3.051-1.455.18-2.867.403-4.322.583-.246-2.076-.318-4.336-.828-6.359.168-.316-.377-.698-.521-1.092-.939-.235-2.152-.772-3.016-.035-.168 1.646.457 3.178.281 4.603.092.086.229.17.188.305l-.17.183c.254 2.387.514 4.95.719 7.161.812.506 2.055.51 2.436 1.34-.59.95-2.5.791-2.146 2.153l.949 10.168c1.311.756 3.549-1.312 3.406 1.176l-.172.183.699 6.496c-1.707.721-3.842.435-5.416-.268-1.893.416-3.502 1.355-5.543 1.288-.518-2.333-.611-5.213-.918-7.819.877-.339 2.082-.068 2.865-.537-.332-3.36-.803-6.981-.967-10.7-.775-.64-1.701-.521-2.432-1.163.367-.987 1.746-.81 1.984-1.66-.256-3.806-.561-7.742-.809-11.327l-.391-1.096c-1.012.255-2.068.422-2.791 1.377-.199 2.046-.129 4.261.211 6.512l.021.665-4.148.578-1.494-16.049c1.892-.416 3.849-.168 5.587.13 1.52-1.025 3.41-1.44 5.219-1.766 2.236-.693 4.881 1.571 6.668-.704 1.101-.302 2.013-.818 3.164-.9zM90.879 31.865c.484 2.646.558 4.905.867 7.645-5.429-.712-1.547 5.593-2.299 8.367l.479 3.842 2.426 1.03a62.595 62.595 0 0 0-2.202 1.801c.41 4.466 1.045 9.013 1.231 13.397.011 1.729-.921 3.045-1.942 4.364-3.423 2.417-8.473 2.492-12.076.702-3.202-3.09-2.917-7.977-3.275-12.178-.816-1.969.978-5.397-2.388-5.333-.033-1.018 1.11-1.321 1.664-2.004l-.959-10.479c-.61-1.045-1.725.1-2.711-.223l-.597-7.519c2.53-1.235 5.058 1.565 7.019-.849.738-.467 1.668-.497 2.504-.701.393 1.185.065 2.038.59 3.173l-.128.138c.135 1.459.488 2.778.449 4.287-.918.385-2.393.034-2.669 1.063.43.961-.103 2.309.546 3.174-.34.455.006 1.552-.066 2.086.145 1.726.553 3.396.48 5.262.723.42 1.801.873 2.26 1.346-.55.816-1.561 1.071-1.979 1.839.623 2.817.341 6.418 1.234 9.361.701 1.13 2.071.997 3.229 1.181 1.137-.48 2.736-.354 3.307-1.881.781-3.263-.561-6.367-.49-9.696l-2.255-1.213c.323-.986 1.662-.675 2.029-1.663-.177-4.118-.771-7.424-1.168-11.447-.785.381-1.816.015-2.558.394a39.846 39.846 0 0 1-.735-7.648c1.543-.228 3.529-.513 4.968.149 1.516-1.026 3.365-1.396 5.215-1.767zM44.982 39.25c.641 4.724.625 9.735 1.438 14.321a8.409 8.409 0 0 1-3.481.601c-.346-2.472.018-6.298-2.981-7.221-.739.468-1.804.413-2.174 1.312-.202 3.333 1.072 7.105 4.28 8.997.889.104 1.579-.495 2.39-.077-.208.406-.417.812-.761 1.133 4.592 3.577 6.373 9.284 5.271 14.996-.545 2.324-3.178 3.163-5.293 3.498-2.435.079-4.518-1.273-6.729.218l-.792.203c-.932-4.139-.684-8.803-1.352-13.038 1.11.097 4.036-1.284 3.71.988.134 1.415-.331 3.47 1.251 4.439 1.301.49 3.16.43 4.096-.798 1.279-1.549.194-3.599-.475-5.084-1.064-1.385-2.166-2.546-3.443-3.702l-1.944.196c.109-.713.879-1.58.105-2.221-4.19-3.5-5.796-9.302-4.779-14.833 1.119-2.431 3.932-3.144 6.592-3.096 2.08 1.215 3.028-.989 5.071-.832zM64.631 39.766c.692 2.195.644 4.812 1.207 7.145l.133-.004-.295.453.715 7.028c.678.421 1.438.619 2.122 1.217-3.604.914-.942 5.13-1.357 7.361-.108 3.506 1.541 7.888-.933 10.895-2.63 2.258-6.137 2.106-9.517 1.727-2.368-.588-3.423-3.082-3.855-5.462-.959-3.605-.523-7.965-1.482-11.57l-1.796-.741c1.436-.8 2.087-2.595 1.459-4.215l-.098-3.012c-.283-3.272-1.411-7.98.44-11.056 2.362-2.338 5.663-3.066 8.994-2.819 1.693.298 3.592 1.478 4.263 3.053zm-8.135 4.698c-2.611 1.504-1.188 4.384-1.243 6.781l-.129.138c.18 1.457.403 2.869.626 4.281.634.422 1.525.571 1.945 1.223-.648.508-1.342.975-1.852 1.656.903 3.253-.309 6.884 2.036 9.513 1.399.797 3.426.421 4.639-.461 1.1-3.006-.476-6.503-.319-9.878l-1.983-1.045c.377-.677.978-1.273 1.713-1.829.162-.493-.34-.92-.042-1.284-.619-2.686-.458-5.928-1.07-8.436-1.114-1.561-2.771-.709-4.321-.659zM151.061 76.33c.486 2.689.715 5.609.713 8.314-.855-.416-1.68.143-2.518.215L138.43 95.453l-.164.449c4.537 4.643 9.244 10.387 14.049 15.067l1.904-.062c.217 1.279.439 2.646.615 3.971.023.754.068 2.082.092 2.836-.209.406.508.648.031.975-2.295.295-4.965-.062-7.207-.877-2.059.732-4.451.811-6.842.844.043-2.752-1.055-5.199-.568-7.965 1.293.225 2.266.193 3.496-.111-4.08-4.26-8.051-9.143-12.041-13.314-.34.455-.049 1.244-.125 1.602.635 3.217.498 7.168 1.121 9.986.057.396-.092 1.287.234 1.766 1.215.625 3.912-.971 3.848 1.16-.258.23-.111.625-.146.938l.184.17c-.088.092-.217.186-.168.316l.182.172-.172.139c.186 1.59.549 3.264.51 4.773-2.162.291-4.701-.07-6.766-.891-2.158.381-4.316.85-6.664.881-.484-2.645-.693-5.033-.734-7.648 1.021.057 2.305.014 3.191.031l.334-.633-.979-9.725c-.943-.412-1.934-.867-2.924-1.324l-.01-.309c.879-.207 1.666-.543 2.359-1.053-.035-3.813-.303-7.973-.824-11.769-1.213-.493-2.391.077-3.547-.062l-.691-7.649c2.43-.256 4.658.16 6.844.577l.344-.322c1.898-.239 3.779-1.009 5.691-.805.125-.27.439-.147.658-.199.092 2.835.645 4.857.867 7.644-1.182.438-2.75-.088-3.791.611.27 2.829.361 5.709.895 8.441 3.363-2.859 6.715-6.072 9.902-8.968l-3.635-.016c-.268-2.785-.518-5.039-.74-7.825.135.04.219-.096.305-.143.191.393.348-.232.621-.02 2.611-.085 5.354 1.113 7.674.195 1.806-.328 3.47-.869 5.418-.977zM111.836 83.055c1.209 1.779-.379 6.132 2.951 6.291l1.117.274c-.672 1.175-4.139.843-2.598 3.277-.025 1.996-1.432 3.727-2.9 4.883 2.076 1.174 3.467 3.08 3.855 5.463l.713 6.982c1.076.41 2.496.408 3.514.375l.551 7.477c-3.502-.02-7.35.193-9.482-2.709-1.514-4.34-.889-9.639-2.357-13.98-2.004-1.664-4.699-1.4-7.229-1.496l-1.273.352c.064 3.412.871 6.402.945 10.037l3.375.201c.143 1.725.555 3.484.475 5.084.539.248-.338.543.201.791-.342.365.16.793.043 1.285-3.039.586-5.633-1.504-8.345-.395-1.231.305-2.351-.057-3.492.289-.58-1.488-.417-3.312-.647-4.945-.067-.707-.223-1.412-.204-2.211l2.877-.094c-.018-3.279-.438-6.682-.679-10.043l-2.565-1.203c.317-1.164 1.85-.371 2.345-1.494l-1-10.345c-.86-.549-2.086-.11-3.197-.207-.173-2.61-.595-4.682-.542-7.167 2.028-.332 3.686.236 5.471.621 5.932-1.523 13.784-2.664 18.077 2.607zm-14.061 3.781c.076.973-.055 2.44.293 3.538l-.174.139c.244 2.076.445 4.154.689 6.231 2.43-.257 4.971.236 7.289-.725 1.629-1.693 1.496-4.438.939-6.593-1.715-3.759-5.916-2.07-9.036-2.59zM54.824 85.211c.997 2.052-.474 5.914 3.034 6.11-2.79.091-1.665 3.336-2.047 5.21-.634.951-1.172 2.123-2.486 2.609-2.595.615-5.368 1.193-8.076 1.059l-.3.32c.34 2.295.199 4.783.67 7.029.062.529-.037 1.598.249 2.209.846.105 1.785.387 2.578.227l.645 6.232c-2.584.926-4.746-1.486-7.314-.074l-2.254.207c-.2-2.078-.455-4.465-.648-6.365.781-.514 1.513.217 2.391-.078-.005-2.881-.414-5.928-.642-8.893l-2.079-1.217c.377-.68 1.353-.666 1.863-1.348l-.751-8.135c-.761-.241.112-.624-.213-1.101-.89-.104-1.605-.303-2.528-.051-.332-2.029-.362-4.334-.512-6.236 1.451-.357 3.183-.236 4.443.344 4.513-1.52 10.736-2.343 13.977 1.942zM48.7 89.09c-1.551.006-3.075-.521-4.61-.028-.001 2.705.26 5.312.74 7.824l-.173.139c.176-.051.224.082.315.168 1.631-.275 4.339-.141 5.708-1.648.385-1.831.438-4.316-.677-5.876L48.7 89.09zM78.164 87.471c-.925.163-2.134-.197-2.866.447 1.344 3.194 2.253 6.623 3.379 9.914.907.635 2.015.643 2.919 1.191l-1.906 1.348c.948 3.295 2.334 6.398 3.37 9.646.815.549 2.042.111 3.021.213.559 2.199.425 4.908.542 7.166-3.272.238-5.998-1.801-9.23-.367l-1.771.059-.53-6.812c.796-.07 1.686.033 2.385-.254-.735-2.193-1.428-4.434-2.119-6.627-1.677.23-3.465-.244-5.275-.008-.719 2.418-.266 4.088-.761 6.588.77.508 2.595-.617 2.597.848-.195 2.178.622 4.148.203 6.246-2.298.207-4.388-1.367-6.578-.586-1.054.301-2.342.209-3.493.246l-.703-6.674c.968-.209 1.605.303 2.574.094.786-3.084.946-6.371 1.598-9.496l-1.944-1.18 2.349-1.361c.334-3.381 1.252-6.515 1.407-9.935-.852-.283-1.738-.298-2.712-.267l-.53-6.68c1.768-.146 3.813.054 5.765.124.997.677 2.075-.245 3.177-.414 1.459-.136 2.819-.534 4.417-.453l.715 6.984zm-6.316 6.147l-.131 1.423c-.43 1.787-1.034 3.67-.932 5.439l3.674-.119-.181-.127c-.87-2.232-1.78-4.331-2.43-6.616z"
++            fillRule="evenodd" clipRule="evenodd"/>
++        <path d="M165.654 46.663L18.664 58.026m144.541-35.379L17.565 39.469" fill="none" stroke="#000"
++              strokeWidth=".228" strokeMiterlimit="2.613"/>
++    </svg>);
+\ No newline at end of file
+diff --git a/src/js/components/Main.jsx b/src/js/components/Main.jsx
+new file mode 100644
+index 0000000..d3a3946
+--- /dev/null
++++ b/src/js/components/Main.jsx
+@@ -0,0 +1,14 @@
++import { Switch, Route } from 'react-router-dom';
++import  { Home } from './Home';
++import { Teams } from './Team';
++import { NotFound} from './NotFound';
++
++export const Main = () => (
++  <main>
++    <Switch>
++      <Route exact path='/' component={Home}/>
++      <Route path='/team' component={Teams}/>
++      <Route path='*' component={NotFound}/>
++    </Switch>
++  </main>
++);
+\ No newline at end of file
+diff --git a/src/js/components/NotFound.jsx b/src/js/components/NotFound.jsx
+new file mode 100644
+index 0000000..6b2f607
+--- /dev/null
++++ b/src/js/components/NotFound.jsx
+@@ -0,0 +1,4 @@
++import React from 'react';
++
++export const NotFound = () => (<div className="NotFound">
++</div>);
+\ No newline at end of file
+diff --git a/src/js/components/Team.jsx b/src/js/components/Team.jsx
+new file mode 100644
+index 0000000..7320c6d
+--- /dev/null
++++ b/src/js/components/Team.jsx
+@@ -0,0 +1,62 @@
++import React from 'react';
++import { Switch, Route, Link } from 'react-router-dom';
++import PropTypes from 'prop-types';
++import {teams, getTeams} from './teams';
++import { addErrorBounds } from './Alert';
++
++export const Team = ({displayName, name, image}) => (<div className="team">
++    <Link to={`/team/${name}`}>
++        <img src={image} alt={displayName} title={displayName}/>
++    </Link>
++</div>);
++Team.propTypes = {
++    match: PropTypes.shape({
++        displayName: PropTypes.string,
++        name: PropTypes.string,
++        image: PropTypes.string,
++    })
++};
++export const TeamsRender = () => (<div className="teams">
++    { teams.map(item => <Team {...{...item, key: item.name}}/>) }
++</div> );
++export const Member = (member) => {
++    const { actor, character } = member;
++    return (<div className="member">
++        <div className="character">
++            {character}
++        </div>
++        <div className="actor">
++            {actor}
++        </div>
++    </div>);
++};
++Member.propTypes = {
++    member: PropTypes.shape({
++        actor: PropTypes.string,
++        character: PropTypes.string,
++    })
++};
++export const Members = ({ match: { params: { name }}}) => {
++    const { displayName, image, members } = getTeams(name)[0];
++    return (<div className="team">
++        <div className="spacer">
++            <img className="animate" src={image} alt={displayName} title={displayName}/>
++        </div>
++        { members.map(item => <Member {...{...item, key: item.character}} />)}
++    </div>);
++};
++Members.propTypes = {
++    match: PropTypes.shape({
++        params: PropTypes.shape({
++            name: PropTypes.string,
++        }),
++    }),
++};
++// showing how you can use HOC to reuse error boundaries
++export const BoundedMembers = addErrorBounds(Members);
++export const Teams = () => <div className="TeamContainer">
++    <Switch>
++      <Route exact path='/team' component={ TeamsRender }/>
++      <Route path='/team/:name' component={ BoundedMembers } />
++    </Switch>
++</div>;
+diff --git a/src/js/components/addMessage.jsx b/src/js/components/addMessage.jsx
+new file mode 100644
+index 0000000..9d754e5
+--- /dev/null
++++ b/src/js/components/addMessage.jsx
+@@ -0,0 +1,46 @@
++import React, {Component} from 'react';
++/**
++ *  Beware: React setState is asynchronous!
++ *  Calling setState multiple times during a single update cycle can lead to nasty bugs, because
++ *  setState is asynchronous, subsequent calls in the same update cycle will overwrite previous
++ *  updates, and the previous changes will be lost.
++ *
++ *  This wrapper uses the alternative setState calling convention
++ *  @see https://reactjs.org/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
++ * @param message the message you want to add to the log console
++ */
++const addMessageAction = (message) => (previousState) => {
++    // the the logs from the earlier state
++    const returnState = [...previousState.logs];
++    // add our message
++    returnState.push(message);
++    // now return our current state
++    return {logs: returnState};
++};
++
++export const addMessage = ComposedComponent => class extends Component {
++    constructor(props) {
++        super(props);
++        this.state = {
++            logs: [],
++            showLog: false,
++        };
++    }
++    componentDidMount() {
++        const addLog = message => this.setState(addMessageAction(message));
++        addLog('HOC component did mount');
++    }
++    render() {
++        const { logs, showLog } = this.state;
++        const addLog = message => this.setState(addMessageAction(message));
++        const messageOutput = showLog ? (<div id="log">
++            <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
++            { logs.map((item,index) => <p key={index}>{item}</p>) }
++        </div>) : (<button onClick={()=>this.setState({ showLog: true })}>Show Log</button>);
++        return (<ComposedComponent
++            addLog={addLog}
++            messageOutput={messageOutput}
++            {...this.props}
++        />);
++    }
++};
+diff --git a/src/js/components/teams.js b/src/js/components/teams.js
+new file mode 100644
+index 0000000..1923299
+--- /dev/null
++++ b/src/js/components/teams.js
+@@ -0,0 +1,104 @@
++export const teams = [
++  {
++    name: 'xxx',
++    displayName: 'A-team',
++    image: 'https://goodlogo.com/images/logos/the_a-team_logo_2777.gif',
++    members: [{
++      fullName: 'John  Smith',
++      character: 'Hannibal',
++      actor: 'George Peppard',
++    }, {
++      fullName: 'Templeton  Peck',
++      character: 'Face',
++      actor: 'Dirk Benedict',
++    }, {
++      fullName: 'H.M.  Murdock',
++      character: 'Howling Mad',
++      actor: 'Dwight Schultz',
++    }, {
++      fullName: 'Bosco  Baracus',
++      character: 'B.A.',
++      actor: 'Mr. T',
++    }],
++  }, {
++    name: 'zzz',
++    displayName: 'Avengers',
++    image: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Marvel%27s_The_Avengers_logo.svg',
++    members: [{
++      actor: 'Robert Downey Jr.',
++      character: 'Iron Man',
++      fullName: 'Tony Stark ',
++    },
++    {
++      actor: 'Chris Evans',
++      character: 'Captain America',
++      fullName: 'Steve Rogers ',
++    },
++    {
++      actor: 'Mark Ruffalo',
++      character: 'The Hulk',
++      fullName: 'Bruce Banner ',
++    },
++    {
++      actor: 'Chris Hemsworth',
++      character: 'Thor',
++      fullName: 'Thor',
++    },
++    {
++      actor: 'Scarlett Johansson',
++      character: 'Black Widow',
++      fullName: 'Natasha Romanoff ',
++    },
++    {
++      actor: 'Jeremy Renner',
++      character: 'Hawkeye',
++      fullName: 'Clint Barton ',
++    },
++    {
++      actor: 'Tom Hiddleston',
++      character: 'Loki',
++      fullName: 'Loki',
++    },
++    {
++      actor: 'Clark Gregg',
++      character: 'Agent Phil Coulson',
++      fullName: 'Agent Phil Coulson',
++    },
++    {
++      actor: 'Cobie Smulders',
++      character: 'Agent Maria Hill',
++      fullName: 'Agent Maria Hill',
++    },
++    {
++      actor: 'Stellan Skarsgard',
++      character: 'Selvig',
++      fullName: 'Selvig',
++    },
++    {
++      actor: 'Samuel L. Jackson',
++      character: 'Nick Fury',
++      fullName: 'Nick Fury',
++    },
++    {
++      actor: 'Gwyneth Paltrow',
++      character: 'Pepper Potts',
++      fullName: 'Pepper Potts',
++    },
++    {
++      actor: 'Paul Bettany',
++      character: 'Jarvis (voice)',
++      fullName: 'Jarvis (voice)',
++    },
++    {
++      actor: 'Alexis Denisof',
++      character: 'The Other',
++      fullName: 'The Other',
++    },
++    {
++      actor: 'Tina Benko',
++      character: 'NASA Scientist',
++      fullName: 'NASA Scientist',
++    }],
++  }];
++
++export const getTeams = (name) => teams.filter((item => item.name === name));
+\ No newline at end of file
+diff --git a/src/less/index.less b/src/less/index.less
+index e5f79bd..c179533 100644
+--- a/src/less/index.less
++++ b/src/less/index.less
+@@ -1,6 +1,130 @@
+ @font-stack: Helvetica, sans-serif;
+ @primary-color: #333;
++@link-background-color: #41d3f4;
++@link-background-color-hover: #fff;
++@link-background-color-active: #00f9f5;
++@header-background: #4168f4;
++@text-color: #4A4A4A;
++@warning: #d54c53;
+ body {
+     font: 100% @font-stack;
+     color: @primary-color;
+ }
++section.header {
++  background-color: @header-background;
++}
++.member {
++  border-bottom: solid 1px @primary-color;
++}
++.displayName {
++  margin-bottom: 20px;
++  font-size: 18px;
++  border-bottom: solid 1px @primary-color;
++}
++.spacer {
++  height: 125px;
++}
++.team img{
++  width: 250px;
++  padding-bottom: 10px;
++}
++.team img.animate{
++  position: absolute;
++  left: 90%;
++  animation: dude 1s 1 forwards;
++  animation-delay: 100ms;
++}
++@keyframes dude {
++  0% {
++    left: 90%;
++  }
++  100% {
++    left: 60px;
++  }
++}
++section.header,
++.member,
++.teams,
++nav ul {
++    display: flex;
++    justify-content: space-between;
++    list-style: none;
++    padding: 0;
++    padding-right: 5px;
++    li {
++        border-radius: 2px;
++        border: solid 1px @primary-color;
++        padding: 5px;
++        background-color: @link-background-color;
++        transition-property: color, background-color;
++        transition-duration: 1s;
++        transition-timing-function: ease-out;
++        a {
++            text-decoration: none;
++        }
++    }
++    li:hover{
++        background-color: @link-background-color-hover;
++    }
++    li.active {
++        background-color: @link-background-color-active;
++    }
++}
++
++.Logo {
++  background-image: url('svg/React-icon.svg');
++  background-repeat: no-repeat;
++  width: 75px;
++  height: 60px;
++  margin-top: 5px;
++}
++.NotFound{
++  background-image: url('svg/not-found.svg');
++  background-repeat: no-repeat;
++  background-size: 400px 175px;
++  height: 200px;
++  width: 100vh;
++  margin: auto;
++  margin-top: 25px;
++
++}
++main {
++  padding: 10px;
++}
++.TeamContainer {
++  padding: 40px;
++  img {
++    padding-bottom: 20px;
++  }
++}
++.Alert {
++    font-size: 14px;
++    min-height: 48px;
++    border-radius: 3px;
++    background-color: #ffffff;
++    border: solid 1px #e6eaee;
++}
++.Alert .Alert-Flex{
++    display: flex;
++    align-items: stretch;
++
++}
++.Alert .border {
++    flex: 0 0 6px;
++    border-radius: 3px;
++    min-height: 100%;
++    margin-top: -1px;
++    margin-bottom: -1px;
++    background-color: @warning;
++}
++.Alert .title {
++    font-weight: bold;
++    margin: 10px;
++}
++
++.Alert .message {
++    color: @text-color;
++    line-height: 1.71;
++    padding-left: 16px;
++}
++
+diff --git a/src/less/svg/A-Team.svg b/src/less/svg/A-Team.svg
+new file mode 100644
+index 0000000..2b2fda3
+--- /dev/null
++++ b/src/less/svg/A-Team.svg
+@@ -0,0 +1,24 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
++<!-- Created with Inkscape (http://www.inkscape.org/) -->
++<svg
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   version="1.0"
++   width="800"
++   height="250"
++   id="svg2">
++  <defs
++     id="defs4" />
++  <g
++     id="layer1">
++    <path
++       d="M 51.68566,32.681346 L 51.68566,45.248348 C 51.68566,45.813851 51.95163,46.279737 52.427806,46.633687 C 52.950435,46.916455 53.491541,47.079006 54.110003,47.078975 L 54.357385,47.078975 C 55.07021,46.972169 55.636821,46.721969 56.089059,46.386305 C 56.541281,46.050721 56.781713,45.560469 56.781728,44.852537 L 56.781728,44.605155 C 56.781713,43.933955 56.862854,43.340602 57.02911,42.774529 C 57.195319,42.208551 57.440374,41.552343 57.820733,40.84495 C 58.201091,40.137604 58.524247,39.586888 58.81026,39.162752 C 59.096258,38.73868 59.470473,38.272779 59.898741,37.777414 L 61.234603,36.441551 L 62.323084,35.600452 L 62.323084,32.681346 L 51.68566,32.681346 z M 65.192714,32.681346 L 65.192714,66.572672 C 65.192699,67.704707 64.977029,68.417436 64.549521,68.700156 C 64.121966,68.982892 63.640343,69.159281 63.164183,69.19492 L 61.976749,69.541255 C 61.500557,69.78946 61.234588,70.212709 61.234603,70.778165 L 61.234603,70.926594 C 61.424783,71.350713 61.638125,71.717408 61.82832,71.965598 C 62.208679,72.248334 62.960118,72.361409 64.054758,72.361409 L 83.74636,72.361409 L 84.389553,72.361409 L 85.230652,72.361409 L 86.517038,72.015074 C 86.945258,71.802492 87.160199,71.435797 87.160231,70.97607 L 87.110754,70.778165 C 86.968437,70.389668 86.753527,70.114041 86.467561,69.937066 L 85.52751,69.442302 L 85.181175,69.343349 L 84.884317,69.244397 C 84.265838,69.031814 83.703074,68.668491 83.251596,68.155916 C 82.800071,67.643325 82.608371,66.701041 82.608403,65.286285 L 82.608403,32.681346 L 65.192714,32.681346 z M 85.379081,32.681346 L 85.379081,35.649929 C 86.235569,36.251039 86.987008,36.951007 87.605518,37.727937 C 88.366204,38.506023 88.907309,39.232637 89.287716,39.904898 C 89.95404,40.930112 90.488986,41.904615 90.821484,42.824005 C 91.011615,43.283764 91.173186,43.703561 91.316248,44.110391 C 91.459183,44.517253 91.515657,44.894398 91.563629,45.248348 C 91.753761,45.849443 92.075366,46.315344 92.503681,46.633687 C 93.074187,46.950969 93.613709,47.128483 94.136402,47.128451 L 94.383784,47.128451 C 95.002199,47.128483 95.515503,46.951523 95.967028,46.633687 C 96.418474,46.315914 96.659666,45.835605 96.659697,45.198872 L 96.659697,32.681346 L 85.379081,32.681346 z M 123.62433,32.681346 L 106.75288,32.730822 L 106.55497,32.730822 L 103.63587,32.978204 C 102.73141,33.119603 102.30002,33.599358 102.30001,34.413019 C 102.30001,34.872777 102.40982,35.190028 102.69582,35.402547 L 103.7843,36.04574 L 103.9822,36.144693 L 104.27906,36.243646 C 104.80169,36.490806 105.23156,36.794171 105.56545,37.183697 C 105.99227,37.572225 106.20862,38.186809 106.20864,38.964847 L 106.20864,67.41377 C 106.20864,67.943635 106.01922,68.371364 105.61492,68.601203 C 105.21059,68.831075 104.75376,68.990238 104.27906,69.095967 L 102.84425,69.689684 C 102.46389,69.866659 102.30002,70.212709 102.30001,70.778165 C 102.34791,71.308029 102.5118,71.640194 102.84425,71.817169 L 104.08116,72.311933 L 104.57592,72.361409 L 105.07068,72.361409 L 123.62433,72.361409 C 125.38385,72.361409 126.56815,72.287076 127.18663,72.163503 C 127.80504,72.039947 128.12666,71.591857 128.12668,70.778165 C 128.12666,70.17707 127.91327,69.753837 127.53296,69.541255 L 126.24657,69.095967 L 126.1971,69.046491 L 124.76228,68.502251 C 124.38189,68.219531 124.16852,67.710913 124.16857,66.968483 L 124.16857,38.569036 C 124.16853,38.179494 124.22186,37.890568 124.317,37.678461 C 124.41207,37.466449 124.57209,37.261751 124.76228,37.084744 C 125.23843,36.696279 125.72091,36.406815 126.1971,36.194169 L 126.395,36.04574 L 126.69186,35.897311 L 127.68139,35.303594 C 127.96591,34.985283 128.12666,34.695771 128.12668,34.413019 C 128.12666,33.776365 127.80202,33.338186 127.13715,33.126633 C 126.7553,32.949705 126.32776,32.83321 125.90024,32.780298 C 125.47267,32.727465 124.71895,32.681409 123.62433,32.681346 z M 151.18267,32.681346 L 133.17327,32.730822 L 132.53008,32.780298 L 131.83741,33.02768 L 130.55102,33.522444 C 130.12271,33.769604 129.8553,34.002595 129.80887,34.215114 L 129.80887,34.413019 C 129.80884,34.872777 129.96957,35.190028 130.25416,35.402547 L 131.24369,35.897311 L 131.54055,35.996264 C 131.96878,36.137663 132.343,36.356737 132.62903,36.639457 C 133.00936,36.923301 133.17322,37.416925 133.17327,38.123748 L 133.17327,50.245463 L 127.0382,50.245463 L 127.0382,53.609858 L 133.17327,53.609858 L 133.17327,67.41377 C 133.12533,67.943635 132.96449,68.311406 132.67851,68.452774 L 131.68898,68.848585 L 131.54055,68.898062 L 130.30364,69.491778 C 129.97114,69.7033 129.80883,70.141479 129.80887,70.778165 C 129.80884,71.414866 130.13045,71.852491 130.74893,72.064551 C 131.36734,72.27661 132.17442,72.361409 133.17327,72.361409 L 152.32063,72.361409 C 153.41377,72.361409 154.11646,72.24493 154.49759,72.015074 C 154.87863,71.785219 155.09126,71.379259 155.09131,70.778165 C 154.99543,70.17707 154.80678,69.753315 154.49759,69.541255 C 154.18831,69.329211 153.78786,69.202821 153.35964,69.095967 L 153.16173,68.997015 C 152.68549,68.855647 152.20304,68.636573 151.72691,68.353822 C 151.34649,68.035479 151.18263,67.407026 151.18267,66.523195 L 151.18267,38.173225 C 151.18263,37.43081 151.37203,36.936632 151.77639,36.688933 C 152.18064,36.441298 152.63757,36.251546 153.16173,36.144693 L 153.21121,36.095216 C 153.73377,35.988411 154.18989,35.83034 154.54707,35.600452 C 154.90415,35.370645 155.09126,34.978507 155.09131,34.413019 C 155.09126,33.741819 154.76966,33.30364 154.15126,33.126633 C 153.53275,32.878475 152.88642,32.730885 152.1722,32.730822 L 151.57849,32.730822 L 151.18267,32.681346 z M 183.1939,32.681346 L 165.18449,32.730822 C 164.08984,32.730869 163.2557,32.938955 162.6612,33.275062 C 162.06669,33.611248 161.77064,33.896834 161.77062,34.215114 L 161.77062,34.413019 C 161.77062,35.08536 161.90667,35.519042 162.21591,35.748882 C 162.52513,35.978785 162.98122,36.180601 163.55177,36.392075 L 163.74968,36.441551 C 164.27378,36.654181 164.75466,36.96095 165.13502,37.332126 C 165.51537,37.703381 165.67924,38.371099 165.67926,39.360658 L 165.67926,67.809581 C 165.58488,68.198078 165.39704,68.473705 165.13502,68.65068 C 164.87297,68.827655 164.5243,68.990238 164.09601,69.095967 L 163.74968,69.19492 C 163.27494,69.336288 162.8421,69.523158 162.41381,69.788637 C 161.98555,70.054099 161.77064,70.538366 161.77062,71.173976 C 161.865,71.599156 162.2144,71.870334 162.80963,72.064551 C 163.40486,72.258799 164.56134,72.361409 166.27297,72.361409 L 183.1939,72.361409 L 183.1939,32.681346 z M 185.96458,32.681346 L 185.96458,36.095216 C 189.20055,36.306769 191.72697,37.048282 193.53446,38.321654 C 195.34188,39.595089 196.5818,41.006646 197.29467,42.527147 L 197.49257,43.071387 L 197.73996,43.615627 C 197.88218,44.00414 198.20378,44.294206 198.68001,44.506202 C 199.15614,44.718278 199.58755,44.852553 200.01587,44.852537 L 200.21378,44.852537 C 200.73637,44.852569 201.19475,44.718294 201.59911,44.506202 C 202.0034,44.29419 202.24228,43.990286 202.24231,43.566151 L 202.24231,32.681346 L 185.96458,32.681346 z M 281.40453,35.946787 L 275.07155,51.234991 L 312.4757,158.35137 L 266.01737,158.35137 L 259.73387,173.63957 L 318.36339,173.63957 L 327.81338,196.94295 L 328.20919,198.62515 L 326.62595,201.54425 L 322.71731,203.9686 L 321.52988,204.46336 L 320.34245,205.20551 L 314.85057,208.5699 C 313.2728,210.02734 312.47556,211.80873 312.4757,213.91335 C 312.47557,216.82821 314.09431,218.50531 317.37386,218.91047 C 320.65311,219.31559 324.13745,219.50418 327.81338,219.50418 L 337.26337,219.50418 L 430.18003,219.50418 C 439.36527,219.50418 445.26963,219.05761 447.89258,218.16832 C 450.51503,217.27904 451.80094,215.85989 451.80121,213.91335 C 451.80094,211.97177 451.00371,210.52777 449.42634,209.55943 L 444.72609,206.8877 L 441.5596,205.70027 L 438.44258,204.21598 L 431.76327,200.35682 C 429.66484,198.41526 428.06239,195.90939 427.01354,192.83641 L 367.98821,35.946787 L 281.40453,35.946787 z M 193.28708,43.764057 C 192.7165,43.799695 192.25655,43.930044 191.85227,44.159868 C 191.44792,44.389755 191.15341,44.75303 191.01117,45.248348 C 190.72514,46.309169 190.29529,47.269803 189.72478,48.117979 C 189.1063,48.966218 187.86783,49.678899 185.96458,50.245463 L 185.96458,53.659334 C 187.05917,53.800718 187.94824,54.178417 188.68578,54.797291 C 189.42324,55.416197 190.03863,56.069539 190.46693,56.776347 L 191.1596,58.013256 L 191.60488,59.052261 C 191.84296,59.47638 192.11276,59.783672 192.44598,59.942836 C 192.77913,60.102031 193.15711,60.190217 193.58394,60.190217 C 194.20237,60.12008 194.68325,59.99912 194.96928,59.893359 C 195.3496,59.64517 195.51347,59.356782 195.51352,59.002784 L 195.51352,45.693636 C 195.51349,45.056966 195.29627,44.577195 194.82085,44.25882 C 194.34537,43.940493 193.91477,43.764072 193.53446,43.764057 L 193.28708,43.764057 z M 200.65906,59.645977 L 200.46116,59.695454 C 199.93848,59.802291 199.45687,60.006434 199.07582,60.28917 C 198.69468,60.571922 198.42643,60.960608 198.2842,61.52608 L 197.641,62.812466 L 196.602,64.148329 C 195.45942,65.421716 193.95654,66.57264 192.14912,67.562199 C 190.34163,68.552867 188.29609,69.046507 185.96458,69.046491 L 185.96458,72.361409 L 202.78655,72.361409 L 202.78655,61.130269 C 202.69068,60.564813 202.4765,60.154879 202.14335,59.942836 C 201.81013,59.730792 201.32395,59.646009 200.65906,59.645977 z M 268.78805,68.502251 L 213.27554,189.17516 C 211.69789,193.38445 209.28187,196.67426 206.00251,199.02096 C 202.72311,201.36769 199.10725,203.07972 195.16718,204.21598 L 189.27949,205.70027 L 184.13395,207.13509 L 178.64207,209.31205 C 177.06443,210.12229 176.2672,211.09978 176.2672,212.23115 C 176.2672,214.98299 177.26577,216.91814 179.23579,217.97041 C 181.20583,219.02273 184.29151,219.50418 188.48787,219.50418 L 247.11739,219.50418 C 256.55907,219.50418 262.06482,218.95583 263.64251,217.82199 C 265.22007,216.68816 266.01731,214.81993 266.01737,212.23115 C 265.753,210.77373 265.08729,209.88056 264.03832,209.55943 L 258.94225,207.38247 L 255.77576,206.39294 L 252.65875,205.45289 C 250.03998,204.48458 248.1664,203.69564 247.11739,203.1275 C 246.06824,202.55937 244.91784,201.85479 243.60457,201.04949 C 240.97779,199.26601 239.64639,196.38791 239.64646,192.34165 L 240.04227,189.17516 L 241.2297,185.01914 L 278.23804,99.078663 L 268.78805,68.502251 z M 646.09499,184.27699 L 644.90755,187.24558 L 651.9332,208.02566 L 643.22536,208.02566 L 642.03792,210.99424 L 653.02168,210.99424 L 654.80283,215.54607 L 654.90178,215.89241 L 654.60493,216.43665 L 653.86278,216.93141 L 653.6154,216.98089 L 653.41749,217.12932 L 652.37849,217.82199 C 652.0821,218.10499 651.93317,218.45234 651.9332,218.86099 C 651.93318,219.42698 652.25715,219.72237 652.87325,219.80104 C 653.48926,219.87971 654.11227,219.94947 654.80283,219.94947 L 656.58398,219.94947 L 674.04915,219.94947 C 675.77463,219.94947 676.87133,219.82525 677.36406,219.65261 C 677.85672,219.47994 678.10615,219.23899 678.10621,218.86099 C 678.10616,218.48397 677.95727,218.15847 677.66092,217.97041 L 676.77035,217.47565 L 676.17663,217.22827 L 675.58291,216.93141 L 674.346,216.18926 C 673.95181,215.81226 673.65248,215.35113 673.45543,214.75445 L 662.37272,184.27699 L 646.09499,184.27699 z M 530.27076,184.6728 L 530.27076,195.85447 C 530.27076,196.35718 530.51946,196.72728 531.01291,197.0419 C 531.55447,197.29327 532.15319,197.43774 532.79406,197.43771 L 533.04144,197.43771 C 533.78009,197.34277 534.35395,197.14234 534.82259,196.844 C 535.29121,196.54567 535.56474,196.08801 535.56474,195.45866 L 535.56474,195.26075 C 535.56474,194.66407 535.63984,194.1312 535.81212,193.62803 C 535.98437,193.12491 536.25902,192.52521 536.65322,191.89636 C 537.04735,191.26756 537.39588,190.78908 537.69222,190.41207 C 537.98859,190.0351 538.3369,189.61552 538.7807,189.17516 L 540.21552,187.98772 L 541.304,187.24558 L 541.304,184.6728 L 530.27076,184.6728 z M 544.27258,184.6728 L 544.27258,214.80393 C 544.27256,215.81025 544.02293,216.43274 543.57991,216.68403 C 543.13687,216.93537 542.68799,217.04821 542.19457,217.07984 L 540.95766,217.42617 C 540.46421,217.64681 540.2155,218.01199 540.21552,218.51465 L 540.21552,218.66308 C 540.4126,219.0401 540.61217,219.33297 540.80923,219.55366 C 541.20338,219.80498 541.95085,219.94947 543.08515,219.94947 L 563.46942,219.94947 L 564.16209,219.94947 L 565.05266,219.94947 L 566.38853,219.60314 C 566.83226,219.41416 567.03167,219.12121 567.03172,218.71256 L 566.98224,218.51465 C 566.83478,218.1693 566.58591,217.92985 566.28957,217.77251 L 565.34952,217.32722 L 564.95371,217.22827 L 564.65685,217.12932 C 564.01595,216.94032 563.49195,216.64494 563.02413,216.18926 C 562.55622,215.73361 562.33141,214.87416 562.33146,213.61649 L 562.33146,184.6728 L 544.27258,184.6728 z M 565.20109,184.6728 L 565.20109,187.29505 C 566.08864,187.82941 566.83608,188.43499 567.47701,189.12568 C 568.26527,189.81737 568.86398,190.4576 569.25816,191.05526 C 569.94861,191.96662 570.44739,192.86019 570.79192,193.67751 C 570.98896,194.08621 571.18794,194.45382 571.33616,194.81546 C 571.48431,195.17714 571.58331,195.53983 571.63302,195.85447 C 571.83004,196.38883 572.12924,196.75893 572.57307,197.0419 C 573.16426,197.32397 573.76315,197.48722 574.30475,197.48719 L 574.50265,197.48719 C 575.14347,197.48722 575.71694,197.32446 576.18485,197.0419 C 576.65268,196.75939 576.87747,196.37102 576.87752,195.80499 L 576.87752,184.6728 L 565.20109,184.6728 z M 603.69372,184.6728 L 585.0906,184.72228 C 583.95628,184.72231 583.08438,184.86878 582.46835,185.16757 C 581.8523,185.46642 581.52832,185.72569 581.5283,186.00867 L 581.5283,186.1571 C 581.5283,186.75479 581.70265,187.14023 582.02306,187.34453 C 582.34348,187.5489 582.76768,187.75025 583.35893,187.93825 L 583.60631,187.98772 C 584.14939,188.17675 584.59751,188.44937 584.99165,188.77935 C 585.38578,189.10937 585.58535,189.73032 585.58536,190.60997 L 585.58536,215.89241 C 585.48757,216.23777 585.31265,216.47724 585.04112,216.63455 C 584.76957,216.79188 584.39644,216.88692 583.95264,216.98089 L 583.60631,217.07984 C 583.11438,217.20552 582.61528,217.38811 582.17149,217.62408 C 581.72769,217.86008 581.52832,218.29598 581.5283,218.86099 C 581.62608,219.23896 581.99996,219.47991 582.61678,219.65261 C 583.23356,219.8253 584.40542,219.94947 586.17908,219.94947 L 603.69372,219.94947 L 603.69372,184.6728 z M 606.61283,184.6728 L 606.61283,187.69086 C 609.96609,187.87892 612.5571,188.53796 614.4301,189.66992 C 616.30301,190.80194 617.60004,192.02902 618.33873,193.38065 L 618.58611,193.87541 L 618.78402,194.37018 C 618.9314,194.71556 619.28005,194.97333 619.77355,195.1618 C 620.26695,195.35032 620.71504,195.45869 621.15889,195.45866 L 621.40627,195.45866 C 621.94782,195.45869 622.42205,195.35033 622.84108,195.1618 C 623.26003,194.97331 623.43472,194.69772 623.4348,194.3207 L 623.4348,184.6728 L 606.61283,184.6728 z M 703.78446,184.6728 L 686.26981,184.72228 L 682.85594,184.87071 C 682.018,184.99642 681.61903,185.43382 681.61903,186.1571 C 681.66868,186.65982 681.81889,186.9715 682.1138,187.09715 L 683.40018,187.39401 L 684.14233,187.54244 L 684.93395,187.74034 C 685.37621,187.867 685.85063,188.05357 686.31929,188.38353 C 686.78791,188.71356 687.16088,189.19004 687.45725,189.81835 L 703.19074,219.94947 L 706.10985,219.94947 L 715.41141,199.86206 L 715.41141,190.60997 L 711.35434,199.11991 L 703.78446,184.6728 z M 718.28104,184.6728 L 718.28104,215.54607 C 718.28099,216.0171 718.05675,216.33131 717.63784,216.5356 C 717.21885,216.73993 716.79538,216.88692 716.30198,216.98089 L 714.81769,217.52513 C 714.42353,217.68245 714.22396,218.01199 714.22397,218.51465 C 714.27207,218.98569 714.52232,219.2999 714.96612,219.50418 C 715.40987,219.70852 715.80886,219.8683 716.20303,219.89999 L 716.64832,219.94947 L 717.19256,219.94947 L 736.3894,219.94947 C 738.11488,219.94947 739.36078,219.86139 740.05065,219.75156 C 740.74036,219.64172 741.04005,219.23799 741.04018,218.51465 C 741.0401,217.98033 740.84058,217.6152 740.44646,217.42617 L 739.16007,216.98089 L 739.01164,216.93141 L 737.57683,216.48612 C 737.13297,216.20313 736.93354,215.72911 736.93364,215.10078 L 736.93364,189.12568 C 736.93357,188.62303 737.13301,188.27477 737.57683,188.08668 L 739.01164,187.54244 L 739.20955,187.44348 C 739.75259,187.31784 740.20083,187.15305 740.54541,186.94872 C 740.88986,186.74442 741.04005,186.47181 741.04018,186.1571 C 741.0401,185.59113 740.6412,185.2072 739.80327,185.01914 C 739.01491,184.76783 737.86816,184.67284 736.3894,184.6728 L 718.28104,184.6728 z M 643.72012,190.60997 L 633.2806,214.0123 C 632.98423,214.82964 632.56075,215.48624 631.94474,215.94188 C 631.32868,216.39757 630.65636,216.71077 629.91621,216.93141 L 628.77825,217.22827 L 627.8382,217.52513 L 626.7992,217.92094 C 626.50283,218.07826 626.35389,218.29498 626.35391,218.51465 C 626.35391,219.049 626.52806,219.39883 626.89815,219.60314 C 627.26822,219.80747 627.84151,219.94947 628.62982,219.94947 L 639.66306,219.94947 C 641.43672,219.94947 642.48367,219.82325 642.78007,219.60314 C 643.07642,219.38297 643.22536,219.01735 643.22536,218.51465 C 643.17569,218.23165 643.0266,218.03281 642.82955,217.97041 L 641.88949,217.5746 L 641.29578,217.3767 L 640.70206,217.17879 C 640.2101,216.99077 639.86012,216.84384 639.66306,216.7335 C 639.46597,216.62318 639.21712,216.49405 638.97039,216.33769 C 638.47694,215.99139 638.27769,215.44118 638.27772,214.6555 L 638.32719,214.0123 L 638.5251,213.22068 L 645.50127,196.54714 L 643.72012,190.60997 z M 614.23219,194.51861 C 613.64093,194.55029 613.11738,194.66061 612.69842,194.86494 C 612.27943,195.06929 612.00471,195.41417 611.85733,195.85447 C 611.56091,196.7975 611.11266,197.62379 610.52146,198.37776 C 609.88057,199.1318 608.58508,199.75424 606.61283,200.25787 L 606.61283,203.27593 C 607.74713,203.4016 608.66872,203.76477 609.43298,204.31493 C 610.1972,204.86511 610.81978,205.41828 611.26361,206.0466 L 612.00576,207.13509 L 612.45104,208.07514 C 612.69774,208.45215 612.99631,208.72528 613.34162,208.86676 C 613.68684,209.00827 614.08669,209.06468 614.52905,209.06466 C 615.16988,209.00232 615.61797,208.9608 615.91439,208.86676 C 616.30851,208.64613 616.50809,208.34033 616.50811,208.02566 L 616.50811,196.2008 C 616.50806,195.63483 616.2586,195.19742 615.76596,194.91442 C 615.27325,194.63144 614.82422,194.51864 614.4301,194.51861 L 614.23219,194.51861 z M 688.05096,196.15133 L 688.05096,211.83534 C 688.05095,212.96735 687.70233,213.93958 687.06144,214.80393 C 686.42055,215.66827 685.62266,216.28921 684.58762,216.63455 C 683.65037,217.01157 682.95322,217.34109 682.55908,217.62408 C 682.16494,217.90708 681.96532,218.18216 681.96537,218.46518 C 682.06313,218.8422 682.31275,219.15139 682.65804,219.35575 C 683.0033,219.56009 683.40147,219.72487 683.89495,219.85052 L 684.58762,219.94947 L 685.18133,219.94947 L 693.88918,219.94947 C 695.0731,219.94947 696.11858,219.78719 697.00619,219.50418 C 697.89377,219.15883 698.34199,218.77488 698.34205,218.36623 C 698.24274,218.08322 698.09364,217.88036 697.94624,217.72303 C 697.64986,217.44004 697.25224,217.16993 696.75881,216.98089 L 696.26404,216.83246 L 695.7198,216.5356 C 694.92997,216.12695 694.25779,215.63315 693.6418,215.05131 C 693.02572,214.4695 692.70171,213.62838 692.70174,212.52801 L 692.70174,205.05708 L 688.05096,196.15133 z M 479.80485,201.4453 L 479.80485,210.99424 L 513.15193,210.99424 L 513.15193,201.4453 L 479.80485,201.4453 z M 621.85156,208.61938 L 621.60417,208.66885 C 621.06255,208.76383 620.61368,208.91226 620.21884,209.16362 C 619.8239,209.41497 619.52514,209.79893 619.37774,210.30157 L 618.73454,211.43953 L 617.59659,212.62696 C 616.41259,213.75897 614.91771,214.76534 613.04476,215.64502 C 611.17177,216.52567 609.02888,216.93141 606.61283,216.93141 L 606.61283,219.94947 L 624.02852,219.94947 L 624.02852,209.90576 C 623.92918,209.4031 623.73052,209.10477 623.38532,208.91624 C 623.04002,208.72773 622.54052,208.61939 621.85156,208.61938 z"
++       id="path3292"
++       style="font-size:195.27476501px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'4077th';-inkscape-font-specification:'4077th'" />
++    <path
++       d="M 47.287534,30.282366 L 47.287534,42.849369 C 47.287534,43.414872 47.553503,43.880757 48.02968,44.234708 C 48.552309,44.517475 49.093414,44.680027 49.711877,44.679995 L 49.959259,44.679995 C 50.672083,44.573189 51.238695,44.322989 51.690933,43.987326 C 52.143155,43.651741 52.383586,43.16149 52.383602,42.453558 L 52.383602,42.206176 C 52.383586,41.534975 52.464728,40.941623 52.630984,40.375549 C 52.797193,39.809571 53.042248,39.153364 53.422606,38.44597 C 53.802965,37.738624 54.126121,37.187908 54.412134,36.763773 C 54.698131,36.339701 55.072347,35.8738 55.500615,35.378434 L 56.836477,34.042572 L 57.924958,33.201473 L 57.924958,30.282366 L 47.287534,30.282366 z M 60.794588,30.282366 L 60.794588,64.173692 C 60.794572,65.305728 60.578903,66.018457 60.151395,66.301177 C 59.72384,66.583913 59.242217,66.760302 58.766056,66.795941 L 57.578623,67.142275 C 57.10243,67.390481 56.836461,67.813729 56.836477,68.379185 L 56.836477,68.527614 C 57.026656,68.951734 57.239999,69.318429 57.430194,69.566618 C 57.810552,69.849354 58.561992,69.96243 59.656631,69.96243 L 79.348234,69.96243 L 79.991427,69.96243 L 80.832525,69.96243 L 82.118911,69.616095 C 82.547132,69.403513 82.762073,69.036817 82.762105,68.577091 L 82.712628,68.379185 C 82.57031,67.990689 82.355401,67.715062 82.069435,67.538087 L 81.129384,67.043323 L 80.783049,66.94437 L 80.486191,66.845417 C 79.867712,66.632835 79.304948,66.269512 78.85347,65.756937 C 78.401944,65.244345 78.210245,64.302062 78.210277,62.887306 L 78.210277,30.282366 L 60.794588,30.282366 z M 80.980955,30.282366 L 80.980955,33.250949 C 81.837442,33.85206 82.588882,34.552028 83.207392,35.328958 C 83.968078,36.107043 84.509183,36.833657 84.889589,37.505919 C 85.555913,38.531133 86.09086,39.505636 86.423357,40.425026 C 86.613489,40.884784 86.775059,41.304581 86.918121,41.711412 C 87.061056,42.118274 87.117531,42.495419 87.165503,42.849369 C 87.355635,43.450463 87.677239,43.916365 88.105554,44.234708 C 88.676061,44.55199 89.215583,44.729503 89.738275,44.729471 L 89.985657,44.729471 C 90.604072,44.729503 91.117376,44.552544 91.568902,44.234708 C 92.020348,43.916935 92.261539,43.436626 92.261571,42.799892 L 92.261571,30.282366 L 80.980955,30.282366 z M 119.2262,30.282366 L 102.35475,30.331842 L 102.15685,30.331842 L 99.237742,30.579224 C 98.333282,30.720624 97.901895,31.200379 97.901879,32.01404 C 97.901879,32.473798 98.011693,32.791049 98.29769,33.003567 L 99.386171,33.646761 L 99.584077,33.745713 L 99.880935,33.844666 C 100.40356,34.091826 100.83343,34.395192 101.16732,34.784717 C 101.59415,35.173246 101.8105,35.787829 101.81051,36.565867 L 101.81051,65.014791 C 101.81051,65.544655 101.62109,65.972384 101.2168,66.202224 C 100.81247,66.432095 100.35564,66.591259 99.880935,66.696988 L 98.44612,67.290705 C 98.065761,67.46768 97.901895,67.813729 97.901879,68.379185 C 97.949788,68.90905 98.11367,69.241214 98.44612,69.418189 L 99.683029,69.912953 L 100.17779,69.96243 L 100.67256,69.96243 L 119.2262,69.96243 C 120.98573,69.96243 122.17002,69.888096 122.7885,69.764524 C 123.40691,69.640968 123.72854,69.192878 123.72855,68.379185 C 123.72854,67.778091 123.51515,67.354858 123.13483,67.142275 L 121.84845,66.696988 L 121.79897,66.647512 L 120.36416,66.103271 C 119.98377,65.820551 119.77039,65.311934 119.77044,64.569503 L 119.77044,36.170056 C 119.77041,35.780515 119.82373,35.491589 119.91887,35.279481 C 120.01395,35.067469 120.17396,34.862771 120.36416,34.685765 C 120.8403,34.2973 121.32278,34.007835 121.79897,33.79519 L 121.99688,33.646761 L 122.29374,33.498331 L 123.28326,32.904615 C 123.56779,32.586303 123.72854,32.296791 123.72855,32.01404 C 123.72854,31.377385 123.40389,30.939207 122.73903,30.727654 C 122.35718,30.550726 121.92964,30.434231 121.50212,30.381319 C 121.07455,30.328486 120.32083,30.282429 119.2262,30.282366 z M 146.78455,30.282366 L 128.77514,30.331842 L 128.13195,30.381319 L 127.43928,30.628701 L 126.15289,31.123465 C 125.72458,31.370625 125.45717,31.603615 125.41075,31.816134 L 125.41075,32.01404 C 125.41072,32.473798 125.57145,32.791049 125.85604,33.003567 L 126.84556,33.498331 L 127.14242,33.597284 C 127.57066,33.738684 127.94487,33.957757 128.2309,34.240477 C 128.61123,34.524321 128.7751,35.017945 128.77514,35.724769 L 128.77514,47.846484 L 122.64007,47.846484 L 122.64007,51.210878 L 128.77514,51.210878 L 128.77514,65.014791 C 128.7272,65.544655 128.56636,65.912427 128.28038,66.053795 L 127.29085,66.449606 L 127.14242,66.499082 L 125.90551,67.092799 C 125.57301,67.30432 125.4107,67.742499 125.41075,68.379185 C 125.41072,69.015887 125.73232,69.453511 126.3508,69.665571 C 126.96921,69.877631 127.77629,69.96243 128.77514,69.96243 L 147.9225,69.96243 C 149.01564,69.96243 149.71833,69.84595 150.09947,69.616095 C 150.48051,69.386239 150.69314,68.98028 150.69318,68.379185 C 150.5973,67.778091 150.40866,67.354335 150.09947,67.142275 C 149.79018,66.930231 149.38973,66.803841 148.96151,66.696988 L 148.7636,66.598035 C 148.28736,66.456667 147.80492,66.237594 147.32879,65.954842 C 146.94837,65.636499 146.7845,65.008046 146.78455,64.124216 L 146.78455,35.774245 C 146.7845,35.03183 146.9739,34.537652 147.37826,34.289954 C 147.78251,34.042318 148.23944,33.852566 148.7636,33.745713 L 148.81308,33.696237 C 149.33565,33.589431 149.79176,33.43136 150.14894,33.201473 C 150.50603,32.971665 150.69314,32.579527 150.69318,32.01404 C 150.69314,31.342839 150.37153,30.90466 149.75313,30.727654 C 149.13462,30.479496 148.48829,30.331906 147.77408,30.331842 L 147.18036,30.331842 L 146.78455,30.282366 z M 178.79577,30.282366 L 160.78637,30.331842 C 159.69171,30.33189 158.85758,30.539976 158.26307,30.876083 C 157.66856,31.212269 157.37251,31.497855 157.3725,31.816134 L 157.3725,32.01404 C 157.3725,32.68638 157.50854,33.120063 157.81778,33.349902 C 158.12701,33.579805 158.58309,33.781621 159.15365,33.993095 L 159.35155,34.042572 C 159.87565,34.255201 160.35653,34.561971 160.73689,34.933147 C 161.11725,35.304402 161.28111,35.972119 161.28113,36.961679 L 161.28113,65.410602 C 161.18675,65.799098 160.99892,66.074725 160.73689,66.2517 C 160.47485,66.428675 160.12617,66.591259 159.69789,66.696988 L 159.35155,66.795941 C 158.87681,66.937309 158.44397,67.124179 158.01569,67.389657 C 157.58742,67.65512 157.37251,68.139387 157.3725,68.774996 C 157.46687,69.200177 157.81628,69.471355 158.4115,69.665571 C 159.00674,69.859819 160.16322,69.96243 161.87485,69.96243 L 178.79577,69.96243 L 178.79577,30.282366 z M 181.56645,30.282366 L 181.56645,33.696237 C 184.80243,33.90779 187.32884,34.649303 189.13634,35.922674 C 190.94375,37.19611 192.18367,38.607667 192.89654,40.128167 L 193.09445,40.672408 L 193.34183,41.216648 C 193.48405,41.60516 193.80566,41.895226 194.28188,42.107223 C 194.75801,42.319299 195.18943,42.453573 195.61774,42.453558 L 195.81565,42.453558 C 196.33825,42.453589 196.79663,42.319314 197.20099,42.107223 C 197.60527,41.895211 197.84415,41.591307 197.84418,41.167172 L 197.84418,30.282366 L 181.56645,30.282366 z M 277.0064,33.547808 L 270.67342,48.836012 L 308.07757,155.95239 L 261.61925,155.95239 L 255.33574,171.24059 L 313.96526,171.24059 L 323.41525,194.54397 L 323.81107,196.22617 L 322.22782,199.14527 L 318.31919,201.56962 L 317.13175,202.06438 L 315.94432,202.80653 L 310.45244,206.17092 C 308.87467,207.62836 308.07743,209.40975 308.07757,211.51437 C 308.07745,214.42923 309.69619,216.10633 312.97574,216.51149 C 316.25498,216.91661 319.73932,217.1052 323.41525,217.1052 L 332.86524,217.1052 L 425.7819,217.1052 C 434.96714,217.1052 440.8715,216.65863 443.49445,215.76934 C 446.1169,214.88006 447.40281,213.46091 447.40308,211.51437 C 447.40281,209.57279 446.60559,208.12879 445.02822,207.16045 L 440.32796,204.48872 L 437.16147,203.30129 L 434.04446,201.817 L 427.36515,197.95784 C 425.26671,196.01628 423.66426,193.51041 422.61541,190.43743 L 363.59008,33.547808 L 277.0064,33.547808 z M 188.88895,41.365077 C 188.31837,41.400716 187.85842,41.531064 187.45414,41.760888 C 187.04979,41.990775 186.75528,42.354051 186.61304,42.849369 C 186.32701,43.91019 185.89716,44.870824 185.32665,45.718999 C 184.70818,46.567238 183.4697,47.27992 181.56645,47.846484 L 181.56645,51.260355 C 182.66104,51.401738 183.55011,51.779437 184.28765,52.398312 C 185.02511,53.017218 185.6405,53.670559 186.0688,54.377367 L 186.76147,55.614277 L 187.20676,56.653281 C 187.44483,57.077401 187.71463,57.384693 188.04786,57.543856 C 188.381,57.703051 188.75899,57.791238 189.18581,57.791238 C 189.80424,57.7211 190.28512,57.60014 190.57115,57.49438 C 190.95148,57.24619 191.11534,56.957802 191.11539,56.603805 L 191.11539,43.294656 C 191.11536,42.657986 190.89814,42.178216 190.42272,41.859841 C 189.94724,41.541514 189.51665,41.365093 189.13634,41.365077 L 188.88895,41.365077 z M 196.26094,57.246998 L 196.06303,57.296474 C 195.54035,57.403311 195.05875,57.607455 194.67769,57.890191 C 194.29656,58.172942 194.02831,58.561629 193.88607,59.1271 L 193.24288,60.413487 L 192.20387,61.749349 C 191.06129,63.022737 189.55841,64.17366 187.751,65.16322 C 185.9435,66.153888 183.89797,66.647527 181.56645,66.647512 L 181.56645,69.96243 L 198.38842,69.96243 L 198.38842,58.731289 C 198.29256,58.165834 198.07837,57.7559 197.74523,57.543856 C 197.412,57.331812 196.92582,57.247029 196.26094,57.246998 z M 264.38992,66.103271 L 208.87742,186.77618 C 207.29976,190.98547 204.88374,194.27528 201.60439,196.62198 C 198.32498,198.96871 194.70912,200.68074 190.76906,201.817 L 184.88137,203.30129 L 179.73582,204.73611 L 174.24394,206.91307 C 172.6663,207.72331 171.86908,208.7008 171.86908,209.83217 C 171.86908,212.58401 172.86764,214.51916 174.83766,215.57143 C 176.80771,216.62375 179.89339,217.1052 184.08974,217.1052 L 242.71926,217.1052 C 252.16094,217.1052 257.66669,216.55685 259.24438,215.42301 C 260.82194,214.28918 261.61918,212.42095 261.61925,209.83217 C 261.35488,208.37475 260.68917,207.48158 259.64019,207.16045 L 254.54412,204.98349 L 251.37763,203.99396 L 248.26062,203.05391 C 245.64185,202.0856 243.76828,201.29667 242.71926,200.72852 C 241.67011,200.16039 240.51971,199.45581 239.20644,198.65051 C 236.57966,196.86703 235.24827,193.98893 235.24833,189.94267 L 235.64414,186.77618 L 236.83157,182.62016 L 273.83991,96.679683 L 264.38992,66.103271 z M 641.69686,181.87801 L 640.50943,184.8466 L 647.53507,205.62668 L 638.82723,205.62668 L 637.6398,208.59526 L 648.62355,208.59526 L 650.4047,213.14709 L 650.50366,213.49343 L 650.2068,214.03767 L 649.46465,214.53243 L 649.21727,214.58191 L 649.01937,214.73034 L 647.98036,215.42301 C 647.68398,215.70601 647.53504,216.05336 647.53507,216.46201 C 647.53506,217.028 647.85902,217.32339 648.47513,217.40206 C 649.09113,217.48073 649.71414,217.55049 650.4047,217.55049 L 652.18585,217.55049 L 669.65102,217.55049 C 671.3765,217.55049 672.4732,217.42627 672.96594,217.25363 C 673.4586,217.08096 673.70802,216.84001 673.70808,216.46201 C 673.70804,216.08499 673.55915,215.75949 673.2628,215.57143 L 672.37222,215.07667 L 671.7785,214.82929 L 671.18479,214.53243 L 669.94788,213.79028 C 669.55368,213.41328 669.25435,212.95215 669.0573,212.35547 L 657.97459,181.87801 L 641.69686,181.87801 z M 525.87264,182.27383 L 525.87264,193.45549 C 525.87264,193.9582 526.12133,194.3283 526.61478,194.64292 C 527.15635,194.89429 527.75507,195.03877 528.39593,195.03873 L 528.64331,195.03873 C 529.38196,194.94379 529.95582,194.74336 530.42446,194.44502 C 530.89309,194.14669 531.16661,193.68903 531.16661,193.05968 L 531.16661,192.86177 C 531.16661,192.2651 531.24172,191.73222 531.41399,191.22905 C 531.58625,190.72593 531.86089,190.12623 532.25509,189.49738 C 532.64922,188.86858 532.99776,188.3901 533.29409,188.01309 C 533.59046,187.63612 533.93877,187.21654 534.38257,186.77618 L 535.81739,185.58874 L 536.90587,184.8466 L 536.90587,182.27383 L 525.87264,182.27383 z M 539.87445,182.27383 L 539.87445,212.40495 C 539.87444,213.41127 539.62481,214.03376 539.18178,214.28505 C 538.73874,214.53639 538.28986,214.64923 537.79644,214.68086 L 536.55954,215.02719 C 536.06609,215.24784 535.81737,215.61301 535.81739,216.11568 L 535.81739,216.2641 C 536.01447,216.64112 536.21404,216.93399 536.41111,217.15468 C 536.80525,217.406 537.55272,217.55049 538.68702,217.55049 L 559.07129,217.55049 L 559.76396,217.55049 L 560.65454,217.55049 L 561.9904,217.20416 C 562.43413,217.01518 562.63354,216.72223 562.63359,216.31358 L 562.58412,216.11568 C 562.43665,215.77032 562.18778,215.53087 561.89145,215.37353 L 560.95139,214.92824 L 560.55558,214.82929 L 560.25873,214.73034 C 559.61783,214.54134 559.09382,214.24596 558.626,213.79028 C 558.15809,213.33463 557.93329,212.47518 557.93333,211.21751 L 557.93333,182.27383 L 539.87445,182.27383 z M 560.80297,182.27383 L 560.80297,184.89607 C 561.69052,185.43043 562.43795,186.03601 563.07888,186.7267 C 563.86715,187.41839 564.46585,188.05862 564.86003,188.65628 C 565.55048,189.56764 566.04927,190.46121 566.3938,191.27853 C 566.59083,191.68723 566.78981,192.05484 566.93804,192.41649 C 567.08618,192.77816 567.18518,193.14085 567.2349,193.45549 C 567.43191,193.98985 567.73112,194.35995 568.17495,194.64292 C 568.76613,194.92499 569.36502,195.08824 569.90662,195.08821 L 570.10453,195.08821 C 570.74534,195.08824 571.31881,194.92548 571.78672,194.64292 C 572.25456,194.36041 572.47935,193.97204 572.47939,193.40601 L 572.47939,182.27383 L 560.80297,182.27383 z M 599.2956,182.27383 L 580.69247,182.3233 C 579.55816,182.32333 578.68625,182.4698 578.07022,182.76859 C 577.45417,183.06744 577.13019,183.32671 577.13017,183.60969 L 577.13017,183.75812 C 577.13017,184.35581 577.30452,184.74125 577.62494,184.94555 C 577.94535,185.14992 578.36955,185.35127 578.9608,185.53927 L 579.20818,185.58874 C 579.75127,185.77777 580.19939,186.05039 580.59352,186.38037 C 580.98765,186.71039 581.18722,187.33134 581.18724,188.21099 L 581.18724,213.49343 C 581.08944,213.8388 580.91452,214.07826 580.643,214.23557 C 580.37144,214.3929 579.99832,214.48794 579.55452,214.58191 L 579.20818,214.68086 C 578.71625,214.80654 578.21715,214.98913 577.77337,215.2251 C 577.32957,215.4611 577.13019,215.897 577.13017,216.46201 C 577.22795,216.83998 577.60184,217.08093 578.21865,217.25363 C 578.83544,217.42632 580.00729,217.55049 581.78095,217.55049 L 599.2956,217.55049 L 599.2956,182.27383 z M 602.2147,182.27383 L 602.2147,185.29189 C 605.56797,185.47994 608.15898,186.13898 610.03197,187.27094 C 611.90489,188.40296 613.20191,189.63004 613.94061,190.98167 L 614.18799,191.47643 L 614.38589,191.9712 C 614.53328,192.31658 614.88192,192.57435 615.37542,192.76282 C 615.86882,192.95134 616.31691,193.05971 616.76076,193.05968 L 617.00814,193.05968 C 617.54969,193.05971 618.02392,192.95135 618.44296,192.76282 C 618.8619,192.57433 619.0366,192.29874 619.03667,191.92172 L 619.03667,182.27383 L 602.2147,182.27383 z M 699.38633,182.27383 L 681.87169,182.3233 L 678.45782,182.47173 C 677.61987,182.59744 677.22091,183.03484 677.22091,183.75812 C 677.27056,184.26084 677.42076,184.57252 677.71567,184.69817 L 679.00206,184.99503 L 679.7442,185.14346 L 680.53583,185.34136 C 680.97809,185.46802 681.45251,185.65459 681.92116,185.98455 C 682.38979,186.31458 682.76275,186.79106 683.05912,187.41937 L 698.79261,217.55049 L 701.71172,217.55049 L 711.01328,197.46308 L 711.01328,188.21099 L 706.95622,196.72093 L 699.38633,182.27383 z M 713.88291,182.27383 L 713.88291,213.14709 C 713.88286,213.61812 713.65863,213.93233 713.23972,214.13662 C 712.82073,214.34095 712.39726,214.48794 711.90386,214.58191 L 710.41956,215.12615 C 710.0254,215.28347 709.82583,215.61301 709.82585,216.11568 C 709.87395,216.58671 710.12419,216.90092 710.56799,217.1052 C 711.01174,217.30954 711.41074,217.46932 711.8049,217.50101 L 712.25019,217.55049 L 712.79443,217.55049 L 731.99127,217.55049 C 733.71675,217.55049 734.96265,217.46241 735.65252,217.35258 C 736.34223,217.24274 736.64192,216.83901 736.64205,216.11568 C 736.64197,215.58135 736.44245,215.21622 736.04833,215.02719 L 734.76195,214.58191 L 734.61352,214.53243 L 733.1787,214.08714 C 732.73484,213.80415 732.53541,213.33013 732.53551,212.7018 L 732.53551,186.7267 C 732.53545,186.22405 732.73489,185.87579 733.1787,185.6877 L 734.61352,185.14346 L 734.81142,185.0445 C 735.35446,184.91886 735.80271,184.75407 736.14729,184.54974 C 736.49174,184.34544 736.64192,184.07283 736.64205,183.75812 C 736.64197,183.19215 736.24307,182.80822 735.40514,182.62016 C 734.61678,182.36885 733.47004,182.27386 731.99127,182.27383 L 713.88291,182.27383 z M 639.32199,188.21099 L 628.88248,211.61332 C 628.58611,212.43066 628.16262,213.08726 627.54661,213.5429 C 626.93056,213.99859 626.25823,214.31179 625.51808,214.53243 L 624.38012,214.82929 L 623.44007,215.12615 L 622.40107,215.52196 C 622.1047,215.67929 621.95577,215.896 621.95578,216.11568 C 621.95578,216.65002 622.12994,216.99985 622.50002,217.20416 C 622.87009,217.40849 623.44338,217.55049 624.2317,217.55049 L 635.26493,217.55049 C 637.03859,217.55049 638.08554,217.42427 638.38194,217.20416 C 638.67829,216.98399 638.82723,216.61837 638.82723,216.11568 C 638.77756,215.83267 638.62847,215.63383 638.43142,215.57143 L 637.49137,215.17562 L 636.89765,214.97772 L 636.30393,214.77981 C 635.81197,214.59179 635.462,214.44486 635.26493,214.33453 C 635.06785,214.2242 634.81899,214.09508 634.57226,213.93871 C 634.07881,213.59241 633.87956,213.0422 633.87959,212.25652 L 633.92907,211.61332 L 634.12697,210.8217 L 641.10314,194.14816 L 639.32199,188.21099 z M 609.83407,192.11963 C 609.2428,192.15131 608.71926,192.26163 608.3003,192.46596 C 607.88131,192.67031 607.60658,193.01519 607.4592,193.45549 C 607.16278,194.39852 606.71454,195.22481 606.12334,195.97878 C 605.48244,196.73282 604.18695,197.35526 602.2147,197.85889 L 602.2147,200.87695 C 603.349,201.00263 604.27059,201.36579 605.03486,201.91595 C 605.79907,202.46613 606.42165,203.0193 606.86548,203.64763 L 607.60763,204.73611 L 608.05292,205.67616 C 608.29962,206.05318 608.59819,206.3263 608.94349,206.46778 C 609.28872,206.60929 609.68857,206.6657 610.13092,206.66568 C 610.77176,206.60334 611.21985,206.56182 611.51626,206.46778 C 611.91038,206.24715 612.10996,205.94135 612.10998,205.62668 L 612.10998,193.80182 C 612.10993,193.23585 611.86048,192.79844 611.36783,192.51544 C 610.87513,192.23246 610.42609,192.11966 610.03197,192.11963 L 609.83407,192.11963 z M 683.65284,193.75235 L 683.65284,209.43636 C 683.65282,210.56837 683.30421,211.54061 682.66331,212.40495 C 682.02243,213.26929 681.22454,213.89024 680.18949,214.23557 C 679.25224,214.61259 678.55509,214.94211 678.16096,215.2251 C 677.76681,215.5081 677.56719,215.78318 677.56724,216.0662 C 677.66501,216.44322 677.91462,216.75241 678.25991,216.95677 C 678.60517,217.16111 679.00334,217.32589 679.49682,217.45154 L 680.18949,217.55049 L 680.78321,217.55049 L 689.49105,217.55049 C 690.67497,217.55049 691.72045,217.38821 692.60806,217.1052 C 693.49565,216.75985 693.94386,216.3759 693.94393,215.96725 C 693.84461,215.68424 693.69552,215.48138 693.54812,215.32405 C 693.25173,215.04106 692.85412,214.77095 692.36068,214.58191 L 691.86592,214.43348 L 691.32168,214.13662 C 690.53184,213.72797 689.85966,213.23417 689.24367,212.65233 C 688.6276,212.07052 688.30359,211.2294 688.30362,210.12903 L 688.30362,202.6581 L 683.65284,193.75235 z M 475.40672,199.04632 L 475.40672,208.59526 L 508.7538,208.59526 L 508.7538,199.04632 L 475.40672,199.04632 z M 617.45343,206.2204 L 617.20605,206.26987 C 616.66442,206.36485 616.21555,206.51328 615.82071,206.76464 C 615.42577,207.01599 615.12701,207.39995 614.97961,207.90259 L 614.33642,209.04055 L 613.19846,210.22798 C 612.01446,211.35999 610.51958,212.36636 608.64663,213.24604 C 606.77364,214.12669 604.63075,214.53243 602.2147,214.53243 L 602.2147,217.55049 L 619.63039,217.55049 L 619.63039,207.50678 C 619.53106,207.00412 619.33239,206.70579 618.9872,206.51726 C 618.64189,206.32875 618.14239,206.22041 617.45343,206.2204 z"
++       id="text3271"
++       style="font-size:195.27476501px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.79162222;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;font-family:'4077th';-inkscape-font-specification:'4077th'" />
++  </g>
++</svg>
+diff --git a/src/less/svg/React-icon.svg b/src/less/svg/React-icon.svg
+new file mode 100644
+index 0000000..e73b369
+--- /dev/null
++++ b/src/less/svg/React-icon.svg
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
++<svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 841.9 595.3" enable-background="new 0 0 841.9 595.3" xml:space="preserve">
++<g>
++	<path fill="#61DAFB" d="M666.3,296.5c0-32.5-40.7-63.3-103.1-82.4c14.4-63.6,8-114.2-20.2-130.4c-6.5-3.8-14.1-5.6-22.4-5.6v22.3   c4.6,0,8.3,0.9,11.4,2.6c13.6,7.8,19.5,37.5,14.9,75.7c-1.1,9.4-2.9,19.3-5.1,29.4c-19.6-4.8-41-8.5-63.5-10.9   c-13.5-18.5-27.5-35.3-41.6-50c32.6-30.3,63.2-46.9,84-46.9l0-22.3c0,0,0,0,0,0c-27.5,0-63.5,19.6-99.9,53.6   c-36.4-33.8-72.4-53.2-99.9-53.2v22.3c20.7,0,51.4,16.5,84,46.6c-14,14.7-28,31.4-41.3,49.9c-22.6,2.4-44,6.1-63.6,11   c-2.3-10-4-19.7-5.2-29c-4.7-38.2,1.1-67.9,14.6-75.8c3-1.8,6.9-2.6,11.5-2.6l0-22.3c0,0,0,0,0,0c-8.4,0-16,1.8-22.6,5.6   c-28.1,16.2-34.4,66.7-19.9,130.1c-62.2,19.2-102.7,49.9-102.7,82.3c0,32.5,40.7,63.3,103.1,82.4c-14.4,63.6-8,114.2,20.2,130.4   c6.5,3.8,14.1,5.6,22.5,5.6c27.5,0,63.5-19.6,99.9-53.6c36.4,33.8,72.4,53.2,99.9,53.2c8.4,0,16-1.8,22.6-5.6   c28.1-16.2,34.4-66.7,19.9-130.1C625.8,359.7,666.3,328.9,666.3,296.5z M536.1,229.8c-3.7,12.9-8.3,26.2-13.5,39.5   c-4.1-8-8.4-16-13.1-24c-4.6-8-9.5-15.8-14.4-23.4C509.3,224,523,226.6,536.1,229.8z M490.3,336.3c-7.8,13.5-15.8,26.3-24.1,38.2   c-14.9,1.3-30,2-45.2,2c-15.1,0-30.2-0.7-45-1.9c-8.3-11.9-16.4-24.6-24.2-38c-7.6-13.1-14.5-26.4-20.8-39.8   c6.2-13.4,13.2-26.8,20.7-39.9c7.8-13.5,15.8-26.3,24.1-38.2c14.9-1.3,30-2,45.2-2c15.1,0,30.2,0.7,45,1.9   c8.3,11.9,16.4,24.6,24.2,38c7.6,13.1,14.5,26.4,20.8,39.8C504.7,309.8,497.8,323.2,490.3,336.3z M522.6,323.3   c5.4,13.4,10,26.8,13.8,39.8c-13.1,3.2-26.9,5.9-41.2,8c4.9-7.7,9.8-15.6,14.4-23.7C514.2,339.4,518.5,331.3,522.6,323.3z    M421.2,430c-9.3-9.6-18.6-20.3-27.8-32c9,0.4,18.2,0.7,27.5,0.7c9.4,0,18.7-0.2,27.8-0.7C439.7,409.7,430.4,420.4,421.2,430z    M346.8,371.1c-14.2-2.1-27.9-4.7-41-7.9c3.7-12.9,8.3-26.2,13.5-39.5c4.1,8,8.4,16,13.1,24C337.1,355.7,341.9,363.5,346.8,371.1z    M420.7,163c9.3,9.6,18.6,20.3,27.8,32c-9-0.4-18.2-0.7-27.5-0.7c-9.4,0-18.7,0.2-27.8,0.7C402.2,183.3,411.5,172.6,420.7,163z    M346.7,221.9c-4.9,7.7-9.8,15.6-14.4,23.7c-4.6,8-8.9,16-13,24c-5.4-13.4-10-26.8-13.8-39.8C318.6,226.7,332.4,224,346.7,221.9z    M256.2,347.1c-35.4-15.1-58.3-34.9-58.3-50.6c0-15.7,22.9-35.6,58.3-50.6c8.6-3.7,18-7,27.7-10.1c5.7,19.6,13.2,40,22.5,60.9   c-9.2,20.8-16.6,41.1-22.2,60.6C274.3,354.2,264.9,350.8,256.2,347.1z M310,490c-13.6-7.8-19.5-37.5-14.9-75.7   c1.1-9.4,2.9-19.3,5.1-29.4c19.6,4.8,41,8.5,63.5,10.9c13.5,18.5,27.5,35.3,41.6,50c-32.6,30.3-63.2,46.9-84,46.9   C316.8,492.6,313,491.7,310,490z M547.2,413.8c4.7,38.2-1.1,67.9-14.6,75.8c-3,1.8-6.9,2.6-11.5,2.6c-20.7,0-51.4-16.5-84-46.6   c14-14.7,28-31.4,41.3-49.9c22.6-2.4,44-6.1,63.6-11C544.3,394.8,546.1,404.5,547.2,413.8z M585.7,347.1c-8.6,3.7-18,7-27.7,10.1   c-5.7-19.6-13.2-40-22.5-60.9c9.2-20.8,16.6-41.1,22.2-60.6c9.9,3.1,19.3,6.5,28.1,10.2c35.4,15.1,58.3,34.9,58.3,50.6   C644,312.2,621.1,332.1,585.7,347.1z"/>
++	<polygon fill="#61DAFB" points="320.8,78.4 320.8,78.4 320.8,78.4  "/>
++	<circle fill="#61DAFB" cx="420.9" cy="296.5" r="45.7"/>
++	<polygon fill="#61DAFB" points="520.5,78.1 520.5,78.1 520.5,78.1  "/>
++</g>
++</svg>
+\ No newline at end of file
+diff --git a/src/less/svg/The-Avengers.svg b/src/less/svg/The-Avengers.svg
+new file mode 100644
+index 0000000..a4f5186
+--- /dev/null
++++ b/src/less/svg/The-Avengers.svg
+@@ -0,0 +1,54 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++
++<svg
++   xmlns:dc="http://purl.org/dc/elements/1.1/"
++   xmlns:cc="http://creativecommons.org/ns#"
++   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
++   xmlns:svg="http://www.w3.org/2000/svg"
++   xmlns="http://www.w3.org/2000/svg"
++   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
++   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
++   version="1.1"
++   id="Capa_1"
++   x="0px"
++   y="0px"
++   width="1621.45"
++   height="576"
++   viewBox="0 0 1621.45 576"
++   enable-background="new 0 0 1621.449 576"
++   xml:space="preserve"
++   inkscape:version="0.48.2 r9819"
++   sodipodi:docname="Marvel's The Avengers logo.svg"><metadata
++   id="metadata9"><rdf:RDF><cc:Work
++       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
++         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
++   id="defs7" /><sodipodi:namedview
++   pagecolor="#ffffff"
++   bordercolor="#666666"
++   borderopacity="1"
++   objecttolerance="10"
++   gridtolerance="10"
++   guidetolerance="10"
++   inkscape:pageopacity="0"
++   inkscape:pageshadow="2"
++   inkscape:window-width="1600"
++   inkscape:window-height="837"
++   id="namedview5"
++   showgrid="false"
++   fit-margin-top="0"
++   fit-margin-left="0"
++   fit-margin-right="0"
++   fit-margin-bottom="0"
++   inkscape:zoom="0.43664649"
++   inkscape:cx="654.97797"
++   inkscape:cy="307.67424"
++   inkscape:window-x="-8"
++   inkscape:window-y="-8"
++   inkscape:window-maximized="1"
++   inkscape:current-layer="Capa_1" />
++<path
++   d="m 531.972,137.172 -62.129,153.972 26.112,-153.972 h -67.981 l -43.221,327.303 h 73.385 L 601.755,137.172 h -69.783 z m 99.039,189.089 h 58.978 l 17.108,-58.077 h -58.978 l 21.16,-72.034 h 60.328 l 17.558,-58.978 H 618.405 L 522.06,464.476 h 126.51 l 22.511,-62.129 H 608.5 l 22.511,-76.086 z m -384.387,205.25 c -35.353,0 -68.637,-8.956 -97.756,-24.748 l -17.355,35.876 c 34.364,18.378 73.536,28.783 115.111,28.783 78.583,0 148.563,-37.19 193.724,-95.103 h -53.65 c -36.881,34.261 -86.053,55.192 -140.074,55.192 z m 43.595,-124.069 v 33.818 l 83.203,-63.879 -80.519,-75.693 v 32.745 h -85.89 L 292.903,130.45 V 280.752 L 362.45,346.536 364.178,-4.5098552e-6 H 288.073 L 10.015,574.191 102.345,576 176.954,407.442 H 290.219 z M 66.699,425.908 C 49.367,395.277 39.46,359.798 39.46,321.977 c 0,-105.34 76.863,-192.515 176.957,-207.306 L 236.715,72.754995 C 105.105,78.018995 0,187.577 0,321.978 0,375.92 16.931,425.863 45.708,466.67 l 20.991,-40.762 z m 295.615,38.568 v -61.833 l -72.179,61.833 h 72.179 z M 1388.698,309.153 c 16.658,0 26.112,-9.905 28.813,-19.359 l 32.865,-111.202 c 6.303,-21.61 -3.151,-41.419 -32.415,-41.419 h -123.808 l -96.346,327.303 h 67.982 l 40.969,-139.565 h 22.511 c 8.104,0 9.004,5.853 7.203,11.256 l -37.817,128.31 h 67.981 l 35.116,-119.306 c 7.206,-23.412 -2.699,-34.217 -13.054,-36.018 z m -10.804,-105.799 -18.009,60.778 c -3.151,9.905 -9.004,12.606 -15.758,12.606 h -23.41 l 25.662,-86.891 h 21.159 c 10.356,0 13.057,4.952 10.356,13.507 z M 866.016,137.172 828.649,263.681 826.398,137.172 H 768.32 l -96.346,327.303 h 63.931 l 39.168,-130.562 5.853,130.562 h 54.476 l 96.345,-327.303 h -65.731 z m 678.448,58.978 h 59.428 l 17.558,-58.978 h -104.898 c -16.208,0 -32.415,4.502 -40.069,27.463 l -37.367,126.959 c -6.753,23.861 0,39.618 28.363,39.618 h 36.017 c 4.053,0 4.053,1.801 3.151,4.503 l -15.757,55.375 c -2.701,8.104 -4.502,11.256 -17.108,11.256 h -56.727 l -18.458,62.129 h 111.202 c 13.956,0 28.813,-6.753 32.415,-19.81 l 37.367,-126.959 c 9.454,-31.965 -5.853,-45.471 -30.164,-45.471 h -36.467 l 19.358,-66.631 c 2.251,-7.203 7.204,-9.454 12.156,-9.454 z m -538.887,72.034 -17.108,58.077 h 13.956 L 977.664,410 h -22.961 c -9.005,0 -13.057,-3.602 -10.355,-13.056 l 56.276,-190.89 c 2.251,-8.104 5.854,-9.905 13.057,-9.905 h 66.181 l 17.559,-58.978 H 988.919 c -21.61,0 -36.467,6.303 -43.671,30.614 l -69.332,235.911 c -12.605,43.22 13.056,60.778 43.671,60.778 h 41.869 l -7.203,25.662 75.635,-38.268 54.025,-183.687 h -78.336 z m 151.268,58.077 h 58.978 l 17.108,-58.077 h -58.978 l 21.16,-72.034 h 60.328 l 17.558,-58.978 h -128.76 l -96.346,327.303 h 126.51 l 22.511,-62.129 h -62.58 l 22.511,-76.085 z"
++   id="path3"
++   inkscape:connector-curvature="0" />
++</svg>
+\ No newline at end of file
+diff --git a/src/less/svg/not-found.svg b/src/less/svg/not-found.svg
+new file mode 100644
+index 0000000..d854c8d
+--- /dev/null
++++ b/src/less/svg/not-found.svg
+@@ -0,0 +1,26 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!-- Generator: Adobe Illustrator 19.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1440px" height="570px" viewBox="0 0 1440 570" style="enable-background:new 0 0 1440 570;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#545557;}
++</style>
++<g>
++	<path class="st0" d="M720,76c28.2,0,55.6,5.5,81.3,16.4c24.9,10.5,47.2,25.6,66.4,44.8s34.3,41.6,44.8,66.4   c10.9,25.7,16.4,53.1,16.4,81.3s-5.5,55.6-16.4,81.3c-10.5,24.9-25.6,47.2-44.8,66.4c-19.2,19.2-41.6,34.3-66.4,44.8   C775.6,488.5,748.2,494,720,494s-55.6-5.5-81.3-16.4c-24.9-10.5-47.2-25.6-66.4-44.8c-19.2-19.2-34.3-41.6-44.8-66.4   C516.5,340.6,511,313.2,511,285s5.5-55.6,16.4-81.3c10.5-24.9,25.6-47.2,44.8-66.4s41.6-34.3,66.4-44.8C664.4,81.5,691.8,76,720,76    M720,2.6C564,2.6,437.6,129,437.6,285S564,567.4,720,567.4S1002.4,441,1002.4,285S876,2.6,720,2.6L720,2.6z"/>
++	<path class="st0" d="M918.9,84.1c-51-50.4-121.1-81.5-198.5-81.5c-67.9,0-130.2,24-178.9,63.9c0,0,63.9,38.5,20,111.2   C720,187.8,732.5,98,732.5,98c-3.5,53.8-51,79.3-51,79.3C894,178.8,918.9,84.1,918.9,84.1z"/>
++	<g>
++		<path class="st0" d="M631.2,337.4l-63.6-63.6c-5.8-5.8-5.8-15.4,0-21.2v0c5.8-5.8,15.4-5.8,21.2,0l63.6,63.6    c5.8,5.8,5.8,15.4,0,21.2v0C646.6,343.3,637,343.3,631.2,337.4z"/>
++		<path class="st0" d="M652.4,273.8l-63.6,63.6c-5.8,5.8-15.4,5.8-21.2,0v0c-5.8-5.8-5.8-15.4,0-21.2l63.6-63.6    c5.8-5.8,15.4-5.8,21.2,0v0C658.3,258.4,658.3,268,652.4,273.8z"/>
++	</g>
++	<g>
++		<path class="st0" d="M851.2,337.4l-63.6-63.6c-5.8-5.8-5.8-15.4,0-21.2v0c5.8-5.8,15.4-5.8,21.2,0l63.6,63.6    c5.8,5.8,5.8,15.4,0,21.2v0C866.6,343.3,857,343.3,851.2,337.4z"/>
++		<path class="st0" d="M872.4,273.8l-63.6,63.6c-5.8,5.8-15.4,5.8-21.2,0v0c-5.8-5.8-5.8-15.4,0-21.2l63.6-63.6    c5.8-5.8,15.4-5.8,21.2,0v0C878.3,258.4,878.3,268,872.4,273.8z"/>
++	</g>
++	<path class="st0" d="M720,409c21,0,40.1,7.9,54.6,20.8c-4.9-25.7-27.5-45.1-54.6-45.1s-49.7,19.4-54.6,45.1   C679.9,416.8,699,409,720,409z"/>
++	<g>
++		<path class="st0" d="M419.6,440.3h-83.8V570h-61.4V440.3H0v-56L267.9,2.6h67.9V382h83.8V440.3z M274.4,382V194.4    c0-36.8,1.3-78.4,3.9-124.7h-3.1c-12.4,24.7-23.9,45.2-34.7,61.4L64.1,382H274.4z"/>
++	</g>
++	<g>
++		<path class="st0" d="M1440,440.3h-83.8V570h-61.4V440.3h-274.4v-56L1288.3,2.6h67.9V382h83.8V440.3z M1294.9,382V194.4    c0-36.8,1.3-78.4,3.9-124.7h-3.1c-12.4,24.7-23.9,45.2-34.7,61.4L1084.5,382H1294.9z"/>
++	</g>
++</g>
++</svg>
+\ No newline at end of file
+diff --git a/webpack.config.js b/webpack.config.js
+index 86aaad2..a0b2ef7 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -8,7 +8,8 @@ module.exports = {
+       overlay: {
+         errors: true,
+         warnings: true,
+-      }
++      },
++      historyApiFallback: true
+     },
+     entry: {
+         "vendor": [
+@@ -32,7 +33,7 @@ module.exports = {
+                 use: 'eslint-loader',
+             },
+             {
+-                test: /\.js$/,
++                test: /\.js$|\.jsx$/,
+                 exclude: /node_modules/,
+                 use: 'babel-loader'
+             },
+@@ -54,6 +55,10 @@ module.exports = {
+                     fallback: "style-loader"
+                 })
+             },
++            {
++                test: /\.svg$/,
++                use: 'svg-url-loader'
++            }
+         ],
+     },
+     externals: {
+@@ -70,5 +75,8 @@ module.exports = {
+             minChunks: Infinity,
+             async: true
+         })
+-    ]
++    ],
++    resolve: {
++      extensions: ['.js', '.jsx']
++    }
+ };
+\ No newline at end of file

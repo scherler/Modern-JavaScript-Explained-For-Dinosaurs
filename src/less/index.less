@@ -1,6 +1,130 @@
 @font-stack: Helvetica, sans-serif;
 @primary-color: #333;
+@link-background-color: #41d3f4;
+@link-background-color-hover: #fff;
+@link-background-color-active: #00f9f5;
+@header-background: #4168f4;
+@text-color: #4A4A4A;
+@warning: #d54c53;
 body {
     font: 100% @font-stack;
     color: @primary-color;
 }
+section.header {
+  background-color: @header-background;
+}
+.member {
+  border-bottom: solid 1px @primary-color;
+}
+.displayName {
+  margin-bottom: 20px;
+  font-size: 18px;
+  border-bottom: solid 1px @primary-color;
+}
+.spacer {
+  height: 125px;
+}
+.team img{
+  width: 250px;
+  padding-bottom: 10px;
+}
+.team img.animate{
+  position: absolute;
+  left: 90%;
+  animation: dude 1s 1 forwards;
+  animation-delay: 100ms;
+}
+@keyframes dude {
+  0% {
+    left: 90%;
+  }
+  100% {
+    left: 60px;
+  }
+}
+section.header,
+.member,
+.teams,
+nav ul {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0;
+    padding-right: 5px;
+    li {
+        border-radius: 2px;
+        border: solid 1px @primary-color;
+        padding: 5px;
+        background-color: @link-background-color;
+        transition-property: color, background-color;
+        transition-duration: 1s;
+        transition-timing-function: ease-out;
+        a {
+            text-decoration: none;
+        }
+    }
+    li:hover{
+        background-color: @link-background-color-hover;
+    }
+    li.active {
+        background-color: @link-background-color-active;
+    }
+}
+
+.Logo {
+  background-image: url('svg/React-icon.svg');
+  background-repeat: no-repeat;
+  width: 75px;
+  height: 60px;
+  margin-top: 5px;
+}
+.NotFound{
+  background-image: url('svg/not-found.svg');
+  background-repeat: no-repeat;
+  background-size: 400px 175px;
+  height: 200px;
+  width: 100vh;
+  margin: auto;
+  margin-top: 25px;
+
+}
+main {
+  padding: 10px;
+}
+.TeamContainer {
+  padding: 40px;
+  img {
+    padding-bottom: 20px;
+  }
+}
+.Alert {
+    font-size: 14px;
+    min-height: 48px;
+    border-radius: 3px;
+    background-color: #ffffff;
+    border: solid 1px #e6eaee;
+}
+.Alert .Alert-Flex{
+    display: flex;
+    align-items: stretch;
+
+}
+.Alert .border {
+    flex: 0 0 6px;
+    border-radius: 3px;
+    min-height: 100%;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    background-color: @warning;
+}
+.Alert .title {
+    font-weight: bold;
+    margin: 10px;
+}
+
+.Alert .message {
+    color: @text-color;
+    line-height: 1.71;
+    padding-left: 16px;
+}
+

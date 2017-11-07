@@ -42,8 +42,8 @@ export class Layout extends Component {
                 <section>
                     <nav>
                         <ul>
-                          <li><a href="/">Home</a></li>
-                          <li><a href="/x">App2</a></li>
+                          <li><Link to="/">Home</Link></li>
+                          <li><Link to="/x">App2</Link></li>
                         </ul>
                     </nav>
                 </section>

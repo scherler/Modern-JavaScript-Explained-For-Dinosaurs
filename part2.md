@@ -883,9 +883,387 @@ is not changing `this.state.logs`.
 
 #### Creating routes
 
-As soon as you have different pages that you want to expose with your app you need to define routes to tell react when to render 
-the different views. We will use [React Router](https://github.com/ReactTraining/react-router) in the v4 which is not really
-compatible with earlier versions of that library.
+As soon as you have different pages that you want to expose with your app you need to define routes 
+to tell react when to render the different views. 
+We will use [React Router](https://github.com/ReactTraining/react-router) in the v4 which is not 
+really compatible with earlier versions of that library.
 
+First let us activate `stage-2` support for babel, so we can use [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
+in our sources like `const objClone = { ...obj };`
 
+Further we will install a new webpack plugin so we can load svg files and serve them.
+
+```bash
+npm i -S -E react-router-dom
+npm i -D -E babel-preset-stage-2 svg-url-loader
+```
+
+We need to tell babel and webpack that we support `stage-2` now. For this we will add it to `.babelrc` in the `presets`
+
+```json
+{
+  "presets": ["env", "react", "stage-2"]
+}
+```
+
+Since we are starting to develop a real webapp we want to be able to serve svg images. For this we
+need to add a new loader to our `webpack.config.js`. While we have opened the `webpack.config.js` 
+we need to activate [history-api-fallback](https://github.com/webpack/webpack-dev-server/tree/master/examples/history-api-fallback)
+in the `devServer` section to make sure all our routes are using our `index.hmtl`. Further we need to tell webpack to resolve
+not only `js` extensions but as well `jsx` and modify our loader regex to include it as well in the `babel-loader`.
+
+```
+...
+module.exports = {
+    devServer: {
+     ...
+      historyApiFallback: true
+    },
+...
+    module: {
+        rules: [
+            {
+                test: /\.js$|\.jsx$/,
+                exclude: /node_modules/,
+                use: 'babel-loader'
+            },
+...
+            {
+                test: /\.svg$/,
+                use: 'svg-url-loader'
+            }
+        ],
+    },
+...
+    resolve: {
+      extensions: ['.js', '.jsx']
+    }
+};
+```
+
+We are using this loader in our index.less
+
+```less
+.Logo {
+  background-image: url('svg/React-icon.svg');
+  background-repeat: no-repeat;
+  width: 75px;
+  height: 60px;
+  margin-top: 5px;
+}
+.NotFound{
+  background-image: url('svg/not-found.svg');
+  background-repeat: no-repeat;
+  background-size: 400px 175px;
+  height: 200px;
+  width: 100vh;
+  margin: auto;
+  margin-top: 25px;
+
+}
+```
+
+Until now we had just a couple of files to provide some example of what you can do and how. Let us now create
+a lot more to simulate a real world example. The following files are added
+
+```bash
+src/js/components
+├── App.jsx # main component exposing Header and Main
+├── Header.jsx # component to create logo and navigation tabs
+├── Home.jsx # our main index page showing the usage of moment lib
+├── Main.jsx # component to hold all routes and map them to components
+├── NotFound.jsx # in case the route is not defined show a 404
+├── Team.jsx # sample component to show nested routes and data drill down
+└── teams.js # sample teams used
+```
+
+##### Header.js
+
+```javascript
+import React from 'react';
+import { Link, Route } from 'react-router-dom';
+
+export const tabs = [{
+    to:'/',
+    caption:'Home',
+    exact: true,
+}, {
+    to: '/team',
+    caption: 'Teams',
+}];
+
+export const TabsRender = ({ match: { url }}) => <nav><ul> 
+    {tabs.map(tab => {
+        let active = false;
+        const { exact, to, caption} = tab;
+        if (exact) {
+            active = url === to;
+        } else {
+            active = url.indexOf(to) > -1;
+        }
+        return <li key={to} className={ active ? 'active' : ''}>
+            <Link to={to}>{caption}</Link>
+        </li>})
+    }
+</ul></nav>;
+
+TabsRender.propTypes = {
+    match: PropTypes.shape({ url: PropTypes.string })
+};
+
+export const Header = () => (<div className="links">
+    <section className="header">
+        <div className="Logo"></div>
+        <Route path='*' componet={TabsRender} />
+    </section>
+</div>);
+```
+
+We are creating here a typical header where you have a logo on the left side and on the right hand a tap-navigation.
+
+We are matching all path `<Route path='*' componet={TabsRender} />` and then leverage to the `TabsRender` component.
+Here use the `({ match: { url }})` to 
+evaluate which tab is currently active, we can use `exact` to match `url === to` or see whether our current path is based
+on the team section ` url.indexOf(to) > -1`.
+
+You may have noticed by now, that I am a big fan of newer javascript syntax. Let us see the [destruction assignment](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+we use in the `TabRender`. 
+
+We know from the [match](https://reacttraining.com/react-router/core/api/match) documentation that we can expect
+`params, isExact, path, url` being passed to a `Route` child. We further know from the [Route](https://reacttraining.com/react-router/core/api/Route/Route-props) 
+documentation that besides `match` we can expect `location` and `history` as properties passed to our `TabsRender`
+
+```javascript
+const props = { 
+    location,
+    history, 
+    match: { 
+        url, 
+        path, 
+        params, 
+        isExact 
+    }}; // this are the props that are passed from the Route
+// since we are solely interested in the url to make our comparison we can "extract" the value and define a fallback
+// beware of match being null then the fallback will not work, you should use undefined instead of null
+const { match: { url } = { url: 'none'}} = props;
+// in old shool js you need to do the following to prevent NPE
+const oldSchoolUrl = props.match ? props.match.url : 'none';
+// the following should be true in case match had **not** being null
+url === oldSchoolUrl
+```
+
+Now have let us have a look on the `Main` compontent.
+
+```javascript
+import { Switch, Route } from 'react-router-dom';
+import  { Home } from './Home';
+import { Teams } from './Team';
+import { NotFound} from './NotFound';
+
+export const Main = () => (
+  <main>
+    <Switch>
+      <Route exact path='/' component={Home}/>
+      <Route path='/team' component={Teams}/>
+      <Route path='*' component={NotFound}/>
+    </Switch>
+  </main>
+);
+```
+
+Here we are using the `Route` component slightly different then before since we now are matching different `path`.
+The [Switch](https://reacttraining.com/react-router/core/api/Switch)
+elemet will render the first child `<Route>` or `<Redirect>` that matches the location. Our first route uses `exact` because if
+we would not use it, it will be matched on every request and hence our other matches would never be executed. 
+
+The `<Route path='*' component={NotFound}/>` as last route will make sure we will always return at least the 404 page in case we do not
+match any other path. 
+
+The `Home` component is real basic put I want to point to the default import of `App2` `import App2 from './App2';` because it shows the usages of HOC.
+
+##### HOC [higher order components](https://reactjs.org/docs/higher-order-components.html)
+
+In our first version before using the router we used the `Layout` component to pass the `addMessage` method to the children. However 
+we do not need our Layout component anymore but we need that method. The solution is to create a HOC. 
+
+> A higher-order component (HOC) is an advanced technique in React for reusing component logic. HOCs are not part of the React API, per se. They are a pattern that emerges from React’s compositional nature.
+> <cite>[higher order components](https://reactjs.org/docs/higher-order-components.html)</cite>
+
+Our HOC component looks like:
+
+```javascript
+import React, {Component} from 'react';
+
+const addMessageAction = (message) => (previousState) => {
+    // the the logs from the earlier state
+    const returnState = [...previousState.logs];
+    // add our message
+    returnState.push(message);
+    // now return our current state
+    return {logs: returnState};
+};
+
+export const addMessage = ComposedComponent => class extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            logs: [],
+            showLog: false,
+        };
+    }
+    componentDidMount() {
+        const addLog = message => this.setState(addMessageAction(message));
+        addLog('HOC component did mount');
+    }
+    render() {
+        const { logs, showLog } = this.state;
+        const addLog = message => this.setState(addMessageAction(message));
+        const messageOutput = showLog ? (<div id="log">
+            <div>Logs: <button onClick={()=>this.setState({ showLog: false })}>Hide Log</button></div>
+            { logs.map((item,index) => <p key={index}>{item}</p>) }
+        </div>) : (<button onClick={()=>this.setState({ showLog: true })}>Show Log</button>);
+        return (<ComposedComponent
+            addLog={addLog}
+            messageOutput={messageOutput}
+            {...this.props}
+        />);
+    }
+};
+```
+
+What we are doing here is basically augment the component that is passed to us with two new properties `addMessage` as a function
+and `messageOutput` as DOM element.
+
+We are using it in our `App2` as follows and define the `ComposedComponent` as `export default`: 
+
+```javascript
+...
+import { addMessage} from './addMessage';
+...
+export default addMessage(App2);
+// leads to:
+export const addMessage = App2 => class extends Component {
+    ...
+    return (<App2
+        addLog={addLog}
+        messageOutput={messageOutput}
+        {...this.props}
+    />);
+}
+```
+
+##### nested routes
+
+In `Team.jsx` we are using nested routes to create an overview page and the team detail page.
+In the Main component we have declared to match the Teams, so we only
+enter when the `url` starts with `/team`. The following can lead to an error
+which will stop our app from rendering.
+
+```javascript
+...
+export const Teams = () => <div className="TeamContainer">
+    <Switch>
+      <Route exact path='/team' component={ TeamsRender }/>
+      <Route path='/team/:name' component={ Members } />
+    </Switch>
+</div>;
+```
+
+In the case that the team name does not exist we will run into a NPE becasue of
+the fact that `getTeams(name)[0]` return null.
+
+```javascript
+export const Members = ({ match: { params: { name }}}) => {
+    const { displayName, image, members } = getTeams(name)[0];
+    return (<div className="team">
+        <div className="spacer">
+            <img className="animate" src={image} alt={displayName} title={displayName}/>
+        </div>
+        { members.map(item => <Member {...{...item, key: item.character}} />)}
+    </div>);
+};
+```
+
+##### [Error Boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)
+
+First of all let us use a new feature of react 16 where we can
+use [error boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)
+to prevent our app from breaking.
+
+> Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. Error boundaries catch errors during rendering, in lifecycle methods, and in constructors of the whole tree below them.
+> <cite>[error boundaries](https://reactjs.org/blog/2017/07/26/error-handling-in-react-16.html)</cite>
+
+We want to be able to catch the error that can happen in different places
+for our application. This calls to create another HOC, which shows us that we can 
+return an error answer instead of the component that has errors.
+
+```javascript
+import React, {Component} from 'react';
+
+export const Alert = ({error: { message}, info: {componentStack}}) => {
+    const stack = componentStack.split(/\n/)
+        .filter(content => content !== '')
+        .map(item => <li>{item}</li>);
+    return (<div className="Alert">
+        <div className="Alert-Flex">
+            <div className="border">&nbsp;</div>
+            <div className="title">
+                { message }
+            </div>
+        </div>
+        <div className="Alert-Flex">
+            <div className="border">&nbsp;</div>
+            <div className="message">
+                <ul>
+                    { stack }
+                </ul>
+            </div>
+        </div>
+    </div>);
+};
+export const addErrorBounds = ComposedComponent => class extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            hasError: false,
+            message: undefined,
+        };
+    }
+    componentDidCatch(error, info) {
+        // Display fallback UI
+        this.setState({hasError: true, message: {error, info}});
+    }
+    render() {
+        // if we have errors we return an alert and not the ComposedComponent
+        if (this.state.hasError) {
+            const { error, info } = this.state.message;
+            return <Alert {...{error, info}}/>;
+        }
+        return (<ComposedComponent {...this.props} />);
+    }
+};
+```
+
+Now we can add it to our parent `App` component as a `catch all error anywhere` 
+approach with `export default addErrorBounds(App);` and use the default import for our common.js.
+
+However that will basically make our app unusable since we do not render any child.
+
+When we use it on a component level like follows, we can prevent only the problematic component to be rendered
+but the rest of our app will work as expected.
+```javascript
+// showing how you can use HOC to reuse error boundaries
+export const BoundedMembers = addErrorBounds(Members);
+export const Teams = () => <div className="TeamContainer">
+    <Switch>
+      <Route exact path='/team' component={ TeamsRender }/>
+      <Route path='/team/:name' component={ BoundedMembers } />
+    </Switch>
+</div>;
+```
+
+In case that we want to look up a team that triggers a NPE we will now display 
+an alert instead to break our app, which still provides means to go to the registered
+views. In real life you would now go ahead and prevent that non-existing teams can be returned,  however 
+for demonstration purposes of the error boundaries we will not do that.
 

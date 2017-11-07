@@ -1,14 +1,11 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Hello, Hello2 } from './Hello';
+import React from 'react';
+import { Header } from './Header';
+import { Main } from './Main';
+import { addErrorBounds } from './Alert';
 
-export class App extends Component {
-    render() {
-        const { props } = this;
-        return [ <Hello {...props} key="1"/>, <Hello2 {...props} key="2"/>]
-    }
-}
+export const App = () => (<div className="container">
+    <Header/>
+    <Main/>
+</div>);
 
-App.propTypes = {
-    children: PropTypes.node,
-};
+export default addErrorBounds(App);

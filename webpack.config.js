@@ -55,6 +55,10 @@ module.exports = {
                     fallback: "style-loader"
                 })
             },
+            {
+                test: /\.svg$/,
+                use: 'svg-url-loader'
+            }
         ],
     },
     externals: {

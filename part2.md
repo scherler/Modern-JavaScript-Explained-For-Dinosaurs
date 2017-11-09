@@ -542,7 +542,9 @@ Our `Hello` component can be as well written very differently but outputting the
 export const Hello2 = () => (<div>Hello React!</div>);
 ```
 
-This is called a `stateless functional component` and is useful for dumb/presentational components. Presentational components focus on the UI rather than behavior, so it’s important to avoid using state in presentational components.
+This is called a `stateless functional component` and is useful for dumb/presentational components. 
+> Presentational components focus on the UI rather than behavior, so it’s important to avoid using state in presentational components.
+> <cite>[React Stateless Functional Components](https://hackernoon.com/react-stateless-functional-components-nine-wins-you-might-have-overlooked-997b0d933dbc) </cite>
 
 #### props
 

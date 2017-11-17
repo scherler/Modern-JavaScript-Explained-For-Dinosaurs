@@ -1029,7 +1029,18 @@ evaluate which tab is currently active, we can use `exact` to match `url === to`
 on the team section ` url.indexOf(to) > -1`.
 
 You may have noticed by now, that I am a big fan of newer javascript syntax. Let us see the [destruction assignment](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
-we use in the `TabRender`. 
+we use in the `TabRender`. Before a simple destructing example:
+
+```javascript
+const myObject = { one: 'is the loneliest number', two: 'can be as bad as one' }
+const { one, two } = myObject;
+console.log(one); // print: is the loneliest number
+console.log(two); // print: can be as bad as one
+```
+
+This shows that we are first creating an object with two attributes `one, two`. 
+Then we create 2 separate variables `one, two`. This is called destructuring, because it breaks the single object into two parts. 
+Finally, the program prints the value of `one, two`.
 
 We know from the [match](https://reacttraining.com/react-router/core/api/match) documentation that we can expect
 `params, isExact, path, url` being passed to a `Route` child. We further know from the [Route](https://reacttraining.com/react-router/core/api/Route/Route-props) 
